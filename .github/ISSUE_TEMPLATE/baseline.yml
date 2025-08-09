@@ -1,410 +1,544 @@
-name: Threat Hunt Request (PEAK Framework)
-description: Threat hunt request template based on Splunk's PEAK methodology (Prepare, Execute, Act, Knowledge)
-title: "[HUNT] "
-labels: ["threat-hunt", "peak-framework", "triage"]
+name: Baseline Threat Hunt
+description: Template for baseline-driven threat hunting using the PEAK framework
+title: "[BASELINE-HUNT] "
+labels: ["threat-hunt", "baseline-analysis", "peak-framework"]
 projects: ["Security Operations"]
 assignees:
-  - security-team
+  - threat-hunting-team
 body:
   - type: markdown
     attributes:
       value: |
-        ## Threat Hunt Request - PEAK Framework
-        This template follows Splunk's PEAK methodology: **Prepare → Execute → Act → Knowledge**
+        ## Baseline Threat Hunt Request
         
-        Complete this form to properly scope and plan your threat hunting activity.
+        **Methodology**: Establishing normal behavior patterns and identifying statistical anomalies
+        **Framework**: Splunk PEAK (Prepare → Execute → Act → Knowledge)
+        
+        A baseline hunt focuses on understanding "normal" activity in your environment and detecting deviations that could indicate malicious behavior.
 
   - type: input
     id: hunt_name
     attributes:
       label: Hunt Name
-      description: Provide a descriptive name for this threat hunt
-      placeholder: "e.g., APT29 PowerShell Activity Hunt, Credential Dumping Detection"
-    validations:
-      required: true
+      description: Descriptive name reflecting the baseline focus area
+      placeholder: "e.g., 'User Authentication Baseline Analysis', 'PowerShell Execution Patterns', 'Network Traffic Baseline'"
 
   - type: dropdown
     id: priority
     attributes:
       label: Hunt Priority
-      description: What's the urgency based on threat intelligence or risk?
+      description: Urgency based on operational needs and risk assessment
       options:
-        - Critical (Active threat suspected - immediate response)
-        - High (Strong indicators - within 24 hours)
-        - Medium (Moderate risk - within 1 week) 
-        - Low (Proactive/baseline - scheduled)
-    validations:
-      required: true
+        - Critical (Security incident response support)
+        - High (Unusual activity detected - needs baseline)
+        - Medium (Proactive monitoring improvement)
+        - Low (Routine baseline establishment)
 
   - type: markdown
     attributes:
       value: |
         ---
-        ## 🎯 PREPARE Phase
-        *Define the hunt hypothesis, scope, and required resources*
-
-  - type: textarea
-    id: hunt_hypothesis
-    attributes:
-      label: Hunt Hypothesis
-      description: What specific threat behavior or technique are you hunting for? Be specific and testable.
-      placeholder: |
-        Example: "We suspect threat actors are using PowerShell to download and execute malicious payloads from external domains, likely using obfuscated commands to evade detection."
-        
-        Include:
-        - Specific threat or TTP
-        - Expected attacker behavior
-        - Why you suspect this activity
-    validations:
-      required: true
+        ## 🎯 PREPARE Phase - Baseline Definition
 
   - type: dropdown
-    id: mitre_tactic
+    id: baseline_type
     attributes:
-      label: Primary MITRE ATT&CK Tactic
-      description: Which MITRE ATT&CK tactic best describes what you're hunting?
+      label: Baseline Hunt Type
+      description: What kind of baseline are you establishing?
       options:
-        - Initial Access (TA0001)
-        - Execution (TA0002)
-        - Persistence (TA0003)
-        - Privilege Escalation (TA0004)
-        - Defense Evasion (TA0005)
-        - Credential Access (TA0006)
-        - Discovery (TA0007)
-        - Lateral Movement (TA0008)
-        - Collection (TA0009)
-        - Command and Control (TA0010)
-        - Exfiltration (TA0011)
-        - Impact (TA0012)
-        - Multiple Tactics
-    validations:
-      required: true
+        - User Behavior Baseline (authentication, access patterns)
+        - System Behavior Baseline (process execution, services)
+        - Network Behavior Baseline (traffic patterns, connections)
+        - Application Behavior Baseline (specific app usage)
+        - Administrative Baseline (privileged account activity)
+        - Temporal Baseline (time-based activity patterns)
+        - Volumetric Baseline (data transfer, event counts)
+        - Comprehensive Environment Baseline (multiple categories)
 
   - type: textarea
-    id: mitre_techniques
+    id: baseline_objective
     attributes:
-      label: MITRE ATT&CK Techniques
-      description: List specific techniques you're hunting for (include T-codes)
+      label: Baseline Objective
+      description: What specific behavior patterns are you trying to establish as "normal"?
       placeholder: |
-        T1059.001 - PowerShell
-        T1105 - Ingress Tool Transfer
-        T1027 - Obfuscated Files or Information
+        Objective: Establish baseline patterns for [specific activity/system/user group]
+        
+        Key questions to answer:
+        - What does normal [activity] look like in our environment?
+        - What are typical volumes, frequencies, and patterns?
+        - What variations are expected (daily, weekly, seasonal)?
+        - What would constitute an anomaly worth investigating?
+        
+        Example: "Establish baseline PowerShell execution patterns across Windows endpoints to identify normal administrative activity vs. potentially malicious usage."
 
   - type: dropdown
-    id: intelligence_source
+    id: baseline_scope_type
     attributes:
-      label: Intelligence Source / Hunt Driver
-      description: What triggered this hunt request?
+      label: Baseline Scope Type
+      description: What is the scope of this baseline analysis?
       options:
-        - Threat Intelligence (CTI report/feed)
-        - Previous Incident (post-breach analysis)
-        - Industry Alert (vendor/government warning)
-        - Anomalous Behavior (detected by tools/analyst)
-        - Proactive Hunt (scheduled/routine)
-        - Red Team Exercise (validation)
-        - Vulnerability Research (new attack vector)
-        - Compliance Requirement (audit/regulation)
-    validations:
-      required: true
+        - Organization-wide (entire environment)
+        - Department/Business Unit (specific group)
+        - System Type (servers, workstations, specific OS)
+        - User Role (executives, admins, general users)
+        - Application-specific (single application focus)
+        - Network Segment (DMZ, internal, partner networks)
+        - Geographic Location (office locations)
+        - Time-based (specific periods, shifts)
 
   - type: textarea
-    id: hunt_scope_assets
+    id: baseline_scope_details
     attributes:
-      label: Asset Scope
-      description: Which systems, networks, or user groups should be included?
+      label: Detailed Scope Definition
+      description: Specify exactly what systems, users, or activities are included/excluded
       placeholder: |
-        Systems to include:
-        - All Windows endpoints
-        - Domain controllers
-        - High-value servers (list specific ones)
-        - Executive workstations
+        Included in baseline:
+        - All Windows 10/11 endpoints (approximately 500 systems)
+        - Domain-joined systems only
+        - Active users (logged in within last 30 days)
+        - Standard business hours (7 AM - 7 PM local time)
         
-        Exclude:
-        - Test/dev environments
-        - Decommissioned systems
+        Excluded from baseline:
+        - Test/development systems
+        - Contractor laptops
+        - Systems with known issues/patches pending
+        - Scheduled maintenance windows
+        - Holiday periods with reduced activity
 
   - type: checkboxes
-    id: hunt_timeframe
+    id: baseline_timeframes
     attributes:
-      label: Temporal Scope
-      description: What timeframe should this hunt cover?
+      label: Temporal Baseline Scope
+      description: What time periods will you analyze to establish the baseline?
       options:
-        - label: Last 24 hours (recent activity)
-        - label: Last 7 days (weekly baseline)
+        - label: Last 7 days (recent short-term patterns)
         - label: Last 30 days (monthly patterns)
-        - label: Last 90 days (quarterly trends)
-        - label: Custom range (specify in comments)
-        - label: Historical analysis (6+ months)
-        - label: Real-time monitoring
+        - label: Last 90 days (quarterly patterns)
+        - label: Last 6 months (seasonal variations)
+        - label: Last 12 months (annual cycles)
+        - label: Business hours only (8 AM - 6 PM)
+        - label: After hours activity (6 PM - 8 AM)
+        - label: Weekend patterns
+        - label: Holiday/special event periods
+
+  - type: textarea
+    id: expected_patterns
+    attributes:
+      label: Expected Normal Patterns
+      description: What patterns do you expect to see in normal operations?
+      placeholder: |
+        Expected business patterns:
+        - Higher activity during business hours (8 AM - 6 PM)
+        - Lower activity on weekends
+        - Specific applications used by different user groups
+        - Regular backup/maintenance activities
+        
+        Known normal variations:
+        - Month-end financial processing increases
+        - Project deployment periods
+        - Training sessions or onboarding
+        - Seasonal business cycles
+        
+        Technical patterns:
+        - Automated system processes
+        - Scheduled tasks and backups
+        - Update deployments
+        - Regular administrative activities
 
   - type: checkboxes
-    id: required_data_sources
+    id: baseline_data_sources
     attributes:
-      label: Required Data Sources
-      description: Which data sources are needed for this hunt?
+      label: Required Data Sources for Baseline
+      description: Which data sources are needed to establish this baseline?
       options:
-        - label: Windows Event Logs (Security, System, Application)
-        - label: Sysmon logs
-        - label: PowerShell transcription/script block logs
-        - label: EDR/Endpoint telemetry
-        - label: Network traffic (NetFlow/PCAP)
+        - label: Windows Security Event Logs (4624, 4625, 4648, etc.)
+        - label: Sysmon logs (process creation, network, file)
+        - label: PowerShell operational/script block logs
+        - label: EDR telemetry (detailed endpoint data)
+        - label: Network flow data (NetFlow/sFlow)
         - label: DNS query logs
-        - label: Proxy/web filtering logs
-        - label: Email security logs
+        - label: Proxy/web gateway logs
+        - label: Email server logs
         - label: Active Directory audit logs
-        - label: Cloud service logs (AWS/Azure/GCP)
+        - label: DHCP logs (IP assignments)
+        - label: VPN connection logs
         - label: Application-specific logs
-        - label: Threat intelligence feeds
-
-  - type: textarea
-    id: success_criteria
-    attributes:
-      label: Success Criteria & Expected Outcomes
-      description: How will you measure success? What do you expect to find?
-      placeholder: |
-        Success means:
-        - Confirming presence/absence of suspected TTP
-        - Identifying compromised systems (if any)
-        - Creating/improving detection rules
-        - Documenting normal vs. malicious behavior
-        
-        Expected findings:
-        - Baseline activity levels
-        - Potential true positives
-        - False positive patterns to tune out
-
-  - type: markdown
-    attributes:
-      value: |
-        ---
-        ## 🔍 EXECUTE Phase Planning
-        *Plan the hunt execution methodology and queries*
+        - label: Cloud service logs (AWS/Azure/GCP)
+        - label: Database access logs
+        - label: File server access logs
 
   - type: dropdown
-    id: hunt_methodology
+    id: statistical_approach
     attributes:
-      label: Hunt Methodology
-      description: What hunting approach will you use?
+      label: Statistical Analysis Approach
+      description: What statistical methods will you use for baseline analysis?
       options:
-        - IOC-based (searching for known indicators)
-        - TTP-based (hunting for techniques/behaviors)  
-        - Anomaly-based (statistical deviation detection)
-        - Hypothesis-driven (testing specific theory)
-        - Threat Intelligence-driven (CTI-guided hunt)
-        - Crown Jewel focused (protecting critical assets)
-    validations:
-      required: true
+        - Basic Statistics (mean, median, standard deviation)
+        - Time Series Analysis (trends, seasonality)
+        - Frequency Analysis (event counts, distributions)
+        - Behavioral Clustering (grouping similar patterns)
+        - Outlier Detection (statistical anomalies)
+        - Machine Learning (automated pattern recognition)
+        - Comparative Analysis (before/after, group comparisons)
+        - Multiple Methods (comprehensive approach)
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 🔍 EXECUTE Phase - Baseline Analysis Methodology
 
   - type: textarea
-    id: key_hunt_questions
+    id: baseline_analysis_approach
     attributes:
-      label: Key Hunt Questions
-      description: What specific questions will your hunt answer?
+      label: Baseline Analysis Methodology
+      description: How will you systematically establish and analyze the baseline?
       placeholder: |
-        1. Are there any PowerShell executions with suspicious characteristics?
-        2. Which systems show evidence of encoded command execution?
-        3. Are there unusual network connections from PowerShell processes?
-        4. What PowerShell activity is normal vs. suspicious in our environment?
+        Phase 1: Data Collection & Preparation
+        1. Collect historical data for defined timeframe
+        2. Clean and normalize data (remove known bad data)
+        3. Validate data completeness and quality
+        4. Account for known events (maintenance, outages)
+        
+        Phase 2: Pattern Analysis
+        1. Calculate basic statistics (mean, median, std dev)
+        2. Identify temporal patterns (hourly, daily, weekly)
+        3. Segment by relevant categories (user types, systems)
+        4. Document normal ranges and thresholds
+        
+        Phase 3: Anomaly Detection
+        1. Apply statistical models to identify outliers
+        2. Validate anomalies against business context
+        3. Classify anomalies (benign vs. suspicious)
+        4. Document investigation-worthy thresholds
 
   - type: textarea
-    id: initial_search_strategy
+    id: baseline_metrics
     attributes:
-      label: Initial Search Strategy
-      description: Outline your planned search approach and key queries
+      label: Key Baseline Metrics
+      description: What specific metrics will you measure and track?
       placeholder: |
-        Phase 1: Broad collection
-        - Query all PowerShell execution events
-        - Identify baseline patterns
+        Quantitative metrics:
+        - Event volumes per hour/day/week
+        - Unique users/systems/applications
+        - Peak vs. average activity levels
+        - Geographic distribution patterns
         
-        Phase 2: Focused analysis  
-        - Filter for encoded/obfuscated commands
-        - Correlate with network connections
+        Behavioral metrics:
+        - Authentication success/failure rates
+        - Application usage patterns
+        - Network connection frequencies
+        - File access patterns
         
-        Phase 3: Investigation
-        - Timeline suspicious activities
-        - Validate findings with additional sources
+        Temporal metrics:
+        - Business hours vs. after-hours ratios
+        - Weekend vs. weekday patterns
+        - Seasonal variations
+        - Response time patterns
+
+  - type: textarea
+    id: normal_ranges
+    attributes:
+      label: Normal Range Definitions
+      description: How will you define what constitutes "normal" vs. "anomalous" activity?
+      placeholder: |
+        Statistical thresholds:
+        - Within 2 standard deviations = normal
+        - 2-3 standard deviations = worth monitoring
+        - >3 standard deviations = investigate immediately
+        
+        Volume thresholds:
+        - Normal daily range: X to Y events
+        - Peak activity periods: up to Z events acceptable
+        - Minimum activity: below W events may indicate issues
+        
+        Behavioral thresholds:
+        - Normal user login frequency: X times per day
+        - Acceptable after-hours activity: Y% of daily volume
+        - Geographic anomalies: connections from new locations
+
+  - type: checkboxes
+    id: baseline_analysis_techniques
+    attributes:
+      label: Analysis Techniques
+      description: Which analytical techniques will you apply?
+      options:
+        - label: Descriptive statistics (mean, median, mode, range)
+        - label: Time series decomposition (trend, seasonal, residual)
+        - label: Moving averages (smoothing short-term fluctuations)
+        - label: Percentile analysis (95th, 99th percentile thresholds)
+        - label: Correlation analysis (relationships between variables)
+        - label: Clustering analysis (grouping similar behaviors)
+        - label: Anomaly scoring (statistical deviation measures)
+        - label: Control charts (process control limits)
 
   - type: dropdown
-    id: estimated_effort
+    id: anomaly_sensitivity
     attributes:
-      label: Estimated Hunt Duration
-      description: How much time do you expect this hunt to require?
+      label: Anomaly Detection Sensitivity
+      description: How sensitive should anomaly detection be?
       options:
-        - Quick check (1-2 hours)
-        - Half day hunt (4 hours)
-        - Full day hunt (8 hours)
-        - Multi-day hunt (2-3 days)
-        - Extended hunt (1+ weeks)
-        - Ongoing monitoring
-    validations:
-      required: true
+        - Very High (catch minor deviations - high false positives)
+        - High (catch most anomalies - moderate false positives)
+        - Medium (balanced approach - some false positives)
+        - Low (only major anomalies - low false positives)
+        - Adaptive (adjust based on baseline confidence)
 
   - type: markdown
     attributes:
       value: |
         ---
-        ## ⚡ ACT Phase Planning  
-        *Define response and remediation approach*
-
-  - type: checkboxes
-    id: stakeholder_notification
-    attributes:
-      label: Stakeholder Notification Plan
-      description: Who needs to be informed of hunt progress/results?
-      options:
-        - label: SOC Manager (hunt oversight)
-        - label: Incident Response Team (potential escalation)
-        - label: IT Operations (system impact awareness)
-        - label: Asset owners (affected business units)
-        - label: CISO/Security Leadership (executive briefing)
-        - label: Legal/Compliance (regulatory implications)
-        - label: Threat Intelligence Team (CTI feedback)
+        ## ⚡ ACT Phase - Response to Baseline Findings
 
   - type: textarea
-    id: escalation_criteria
+    id: baseline_validation_process
     attributes:
-      label: Escalation Criteria
-      description: When should this hunt escalate to an incident?
+      label: Baseline Validation Process
+      description: How will you validate that your baseline accurately represents normal behavior?
       placeholder: |
-        Escalate to incident response if:
-        - Active compromise confirmed
-        - Lateral movement detected  
-        - Data exfiltration identified
-        - Critical systems affected
-        - Executive/VIP systems involved
-
-  - type: textarea
-    id: immediate_actions
-    attributes:
-      label: Planned Immediate Actions
-      description: What actions might you take based on potential findings?
-      placeholder: |
-        If malicious activity found:
-        - Isolate affected systems
-        - Preserve evidence
-        - Update detection rules
-        - Block malicious indicators
+        Validation methods:
+        - Compare with business process documentation
+        - Interview system/application owners
+        - Cross-reference with change management records
+        - Validate against known good periods
+        - Test baseline against recent known-good activity
         
-        If activity confirmed benign:
-        - Tune alerting thresholds
-        - Document baseline behavior
-        - Update playbooks
+        Quality checks:
+        - Ensure data completeness (>95% coverage)
+        - Account for all major business processes
+        - Validate temporal patterns make business sense
+        - Confirm statistical models are appropriate
+        
+        Stakeholder review:
+        - IT operations team validation
+        - Business unit owner confirmation
+        - Security team peer review
+
+  - type: checkboxes
+    id: anomaly_response_actions
+    attributes:
+      label: Response Actions for Detected Anomalies
+      description: What will you do when anomalies are detected?
+      options:
+        - label: Automated alerting (immediate notification)
+        - label: Manual investigation (analyst review)
+        - label: Business context validation (check for planned activities)
+        - label: Extended monitoring (watch for patterns)
+        - label: Stakeholder notification (inform asset owners)
+        - label: Incident escalation (if malicious activity suspected)
+        - label: Baseline refinement (adjust thresholds if needed)
+        - label: Documentation update (record new normal patterns)
+
+  - type: textarea
+    id: threshold_tuning_plan
+    attributes:
+      label: Threshold Tuning Strategy
+      description: How will you refine baseline thresholds over time?
+      placeholder: |
+        Initial tuning:
+        - Start with conservative thresholds (low false positives)
+        - Monitor for 2 weeks and adjust based on feedback
+        - Gradually increase sensitivity as confidence grows
+        
+        Ongoing tuning:
+        - Weekly review of anomaly alerts
+        - Monthly baseline recalculation
+        - Quarterly comprehensive review
+        - Annual baseline refresh
+        
+        Tuning triggers:
+        - High false positive rate (>X%)
+        - Missing known suspicious activity
+        - Business process changes
+        - Infrastructure changes
+        - Seasonal adjustments needed
 
   - type: markdown
     attributes:
       value: |
         ---
-        ## 🧠 KNOWLEDGE Phase Planning
-        *Plan knowledge capture and sharing*
+        ## 🧠 KNOWLEDGE Phase - Baseline Documentation & Improvement
 
   - type: checkboxes
-    id: documentation_plan
+    id: baseline_documentation_deliverables
     attributes:
-      label: Documentation & Knowledge Sharing
-      description: How will you capture and share hunt results?
+      label: Baseline Documentation Deliverables
+      description: What documentation will you produce from this baseline hunt?
       options:
-        - label: Hunt report (technical findings)
-        - label: Executive summary (business impact)
-        - label: Detection rule updates
-        - label: Playbook improvements
-        - label: IOC/TTP documentation
-        - label: Lessons learned capture
-        - label: Training material updates
-        - label: Threat intelligence contribution
+        - label: Baseline behavior profile (normal patterns document)
+        - label: Statistical analysis report (metrics and thresholds)
+        - label: Anomaly detection playbook (response procedures)
+        - label: Monitoring dashboard (real-time baseline tracking)
+        - label: Alert tuning guide (threshold adjustment procedures)
+        - label: Business context documentation (known variations)
+        - label: Technical implementation guide (query/rule documentation)
+        - label: Executive summary (business value and risk reduction)
 
   - type: textarea
+    id: baseline_monitoring_plan
+    attributes:
+      label: Ongoing Baseline Monitoring Plan
+      description: How will you maintain and update this baseline over time?
+      placeholder: |
+        Continuous monitoring:
+        - Real-time anomaly detection using established thresholds
+        - Daily summary reports of anomalous activity
+        - Weekly trend analysis and threshold validation
+        
+        Periodic updates:
+        - Monthly baseline recalculation (rolling window)
+        - Quarterly comprehensive baseline review
+        - Semi-annual business process validation
+        - Annual complete baseline refresh
+        
+        Change management:
+        - Update baseline after major infrastructure changes
+        - Adjust for new business processes or applications
+        - Account for organizational changes (mergers, new locations)
+        - Seasonal baseline variations (fiscal years, holidays)
+
+  - type: checkboxes
     id: detection_improvements
     attributes:
       label: Expected Detection Improvements
-      description: How might this hunt improve future detection capabilities?
-      placeholder: |
-        - New Splunk searches/alerts
-        - SIEM rule enhancements  
-        - EDR policy updates
-        - Baseline behavior documentation
-        - False positive reduction
-
-  - type: checkboxes
-    id: knowledge_sharing_venues
-    attributes:
-      label: Knowledge Sharing Venues
-      description: Where will you share hunt results and lessons learned?
+      description: How will this baseline improve your detection capabilities?
       options:
-        - label: Team meeting presentation
-        - label: Security wiki/knowledge base
-        - label: Threat hunting community
-        - label: Industry sharing (anonymized)
-        - label: Training program updates
-        - label: Runbook documentation
-        - label: Metrics dashboard updates
+        - label: Reduced false positive rates (better normal definitions)
+        - label: Earlier threat detection (catch smaller deviations)
+        - label: Improved alert prioritization (confidence scoring)
+        - label: Better incident context (normal vs. abnormal comparison)
+        - label: Enhanced threat hunting (know what to look for)
+        - label: Automated anomaly detection (statistical rules)
+        - label: Business-aligned security (operationally relevant alerts)
+        - label: Measurable security posture (quantified normal state)
+
+  - type: textarea
+    id: baseline_sharing_plan
+    attributes:
+      label: Knowledge Sharing Strategy
+      description: How will you share baseline knowledge across the organization?
+      placeholder: |
+        Internal sharing:
+        - Present findings to security team
+        - Share baseline profiles with SOC analysts
+        - Provide summary to business stakeholders
+        - Update security awareness training materials
+        
+        Documentation updates:
+        - Update incident response playbooks
+        - Enhance threat hunting methodologies
+        - Improve security monitoring procedures
+        - Create baseline maintenance procedures
+        
+        Industry sharing:
+        - Anonymized methodology sharing with security community
+        - Lessons learned for threat hunting best practices
+        - Statistical approach documentation for peer review
 
   - type: markdown
     attributes:
       value: |
         ---
-        ## 📋 Additional Context
+        ## 📊 Success Metrics & Quality Assurance
 
   - type: textarea
-    id: constraints_considerations
+    id: baseline_success_criteria
     attributes:
-      label: Constraints & Special Considerations
-      description: Any limitations, dependencies, or special requirements?
+      label: Baseline Hunt Success Criteria
+      description: How will you measure the success of this baseline establishment?
       placeholder: |
-        Technical constraints:
-        - Data retention limits
-        - System performance impact
-        - Limited access to certain logs
+        Completeness metrics:
+        - Data coverage: >95% of target systems/users
+        - Time coverage: Complete data for selected timeframe
+        - Statistical confidence: >90% confidence in patterns
         
-        Business constraints:
-        - Maintenance windows
-        - Critical business periods
-        - Resource availability
+        Quality metrics:
+        - False positive rate: <X% after initial tuning
+        - Business validation: >Y% of patterns confirmed by stakeholders
+        - Anomaly detection: Catches known test cases
         
-        Legal/compliance:
-        - Data privacy requirements
-        - Regulatory restrictions
+        Operational metrics:
+        - Time to establish baseline: <Z days
+        - Stakeholder satisfaction: Positive feedback from business units
+        - Implementation success: Baseline actively used for monitoring
 
   - type: dropdown
-    id: hunt_classification
+    id: baseline_duration
     attributes:
-      label: Hunt Classification
-      description: What's the sensitivity/classification level?
+      label: Estimated Baseline Hunt Duration
+      description: How long do you expect this baseline establishment to take?
       options:
-        - Public (can be discussed openly)
-        - Internal (company confidential)
-        - Restricted (security team only)
-        - Classified (executive approval required)
-    validations:
-      required: true
+        - Quick baseline (1-2 days)
+        - Standard baseline (1 week)
+        - Comprehensive baseline (2-3 weeks)
+        - Complex environment baseline (1 month)
+        - Ongoing baseline development (multi-month project)
 
   - type: textarea
-    id: supporting_context
+    id: data_quality_requirements
     attributes:
-      label: Supporting Intelligence & Context
-      description: Any additional context, IOCs, or references that support this hunt?
+      label: Data Quality Requirements
+      description: What data quality standards must be met for a valid baseline?
       placeholder: |
-        Threat intelligence:
-        - Report references
-        - IOC lists  
-        - Campaign attribution
+        Minimum requirements:
+        - Data completeness: >90% for critical data sources
+        - Data accuracy: <5% known bad/corrupted data
+        - Temporal coverage: No gaps >24 hours in critical periods
+        - System coverage: >95% of in-scope systems reporting
         
-        Environmental factors:
-        - Recent changes
-        - Known vulnerabilities
-        - Previous similar activity
+        Quality validation:
+        - Cross-reference with change management records
+        - Validate against known business events
+        - Check for data collection anomalies or outages
+        - Confirm timestamp accuracy across all sources
+        
+        Exclusion criteria:
+        - Periods with known data collection issues
+        - Times during major outages or incidents
+        - Systems with known logging problems
+        - Data sources with high error rates
+
+  - type: textarea
+    id: business_context_factors
+    attributes:
+      label: Business Context & Environmental Factors
+      description: What business or environmental factors might affect the baseline?
+      placeholder: |
+        Business cycles:
+        - Fiscal year-end processing increases
+        - Monthly/quarterly reporting periods
+        - Seasonal business variations
+        - Holiday schedules and reduced activity
+        
+        Organizational factors:
+        - Recent mergers or acquisitions
+        - New office locations or closures
+        - Major technology deployments
+        - Workforce changes (hiring, layoffs)
+        
+        Technical factors:
+        - Recent infrastructure upgrades
+        - New application deployments
+        - Security tool implementations
+        - Network architecture changes
+        
+        External factors:
+        - Regulatory compliance requirements
+        - Industry-specific events
+        - Economic conditions affecting business
+        - Recent security incidents or threat campaigns
 
   - type: checkboxes
-    id: readiness_checklist
+    id: baseline_hunt_checklist
     attributes:
-      label: Hunt Readiness Checklist
-      description: Confirm readiness before hunt approval
+      label: Baseline Hunt Readiness Checklist
+      description: Confirm readiness before beginning baseline analysis
       options:
-        - label: Hypothesis is clear and testable
-        - label: Required data sources are available
-        - label: Success criteria are defined
-        - label: Stakeholders have been identified
-        - label: Escalation procedures are understood
-        - label: Necessary approvals obtained
-        - label: Hunt conflicts with existing activities checked
-      validations:
-        required: true
+        - label: Baseline scope clearly defined and validated
+        - label: Required data sources confirmed available and complete
+        - label: Statistical analysis approach selected and documented
+        - label: Business context factors identified and documented
+        - label: Success criteria and quality standards defined
+        - label: Stakeholder validation process planned
+        - label: Ongoing monitoring and maintenance plan created
+        - label: Documentation and knowledge sharing strategy ready
