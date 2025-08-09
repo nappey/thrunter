@@ -22,8 +22,6 @@ body:
       label: Hunt Name
       description: Descriptive name reflecting your hypothesis
       placeholder: "e.g., 'Domain Admin Credential Harvesting via LSASS', 'C2 Beaconing Over DNS'"
-    validations:
-      required: true
 
   - type: dropdown
     id: priority
@@ -35,8 +33,6 @@ body:
         - High (Strong intelligence - within 24 hours)
         - Medium (Moderate indicators - within week)
         - Low (Proactive testing - scheduled)
-    validations:
-      required: true
 
   - type: markdown
     attributes:
@@ -85,8 +81,6 @@ body:
         - label: Measurable (has quantifiable indicators)
         - label: Time-bound (has defined temporal scope)
         - label: Relevant (applies to our threat landscape)
-      validations:
-        required: true
 
   - type: dropdown
     id: threat_actor_type
@@ -100,8 +94,6 @@ body:
         - Script Kiddie/Opportunistic (low-skill, automated)
         - Hacktivist (ideologically motivated)
         - Unknown/Generic (behavior-focused, actor-agnostic)
-    validations:
-      required: true
 
   - type: textarea
     id: null_hypothesis
@@ -155,8 +147,6 @@ body:
         - Command and Control (TA0010) - C2 communication
         - Exfiltration (TA0011) - Data theft
         - Impact (TA0012) - Destructive actions
-    validations:
-      required: true
 
   - type: textarea
     id: mitre_techniques
@@ -325,8 +315,6 @@ body:
         - High (85-95% confidence - strong evidence with minor gaps)
         - Medium (70-85% confidence - good evidence with some uncertainty)
         - Low (50-70% confidence - preliminary indicators only)
-    validations:
-      required: true
 
   - type: markdown
     attributes:
@@ -514,8 +502,6 @@ body:
         - Multi-day analysis (2-3 days)
         - Extended investigation (1 week)
         - Deep research hunt (2+ weeks)
-    validations:
-      required: true
 
   - type: textarea
     id: validation_approach
@@ -576,5 +562,3 @@ body:
         - label: Escalation procedures understood
         - label: Documentation strategy defined
         - label: Peer review process arranged
-      validations:
-        required: true
