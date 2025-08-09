@@ -1,0 +1,410 @@
+name: Threat Hunt Request (PEAK Framework)
+description: Threat hunt request template based on Splunk's PEAK methodology (Prepare, Execute, Act, Knowledge)
+title: "[HUNT] "
+labels: ["threat-hunt", "peak-framework", "triage"]
+projects: ["Security Operations"]
+assignees:
+  - security-team
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Threat Hunt Request - PEAK Framework
+        This template follows Splunk's PEAK methodology: **Prepare → Execute → Act → Knowledge**
+        
+        Complete this form to properly scope and plan your threat hunting activity.
+
+  - type: input
+    id: hunt_name
+    attributes:
+      label: Hunt Name
+      description: Provide a descriptive name for this threat hunt
+      placeholder: "e.g., APT29 PowerShell Activity Hunt, Credential Dumping Detection"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Hunt Priority
+      description: What's the urgency based on threat intelligence or risk?
+      options:
+        - Critical (Active threat suspected - immediate response)
+        - High (Strong indicators - within 24 hours)
+        - Medium (Moderate risk - within 1 week) 
+        - Low (Proactive/baseline - scheduled)
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 🎯 PREPARE Phase
+        *Define the hunt hypothesis, scope, and required resources*
+
+  - type: textarea
+    id: hunt_hypothesis
+    attributes:
+      label: Hunt Hypothesis
+      description: What specific threat behavior or technique are you hunting for? Be specific and testable.
+      placeholder: |
+        Example: "We suspect threat actors are using PowerShell to download and execute malicious payloads from external domains, likely using obfuscated commands to evade detection."
+        
+        Include:
+        - Specific threat or TTP
+        - Expected attacker behavior
+        - Why you suspect this activity
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mitre_tactic
+    attributes:
+      label: Primary MITRE ATT&CK Tactic
+      description: Which MITRE ATT&CK tactic best describes what you're hunting?
+      options:
+        - Initial Access (TA0001)
+        - Execution (TA0002)
+        - Persistence (TA0003)
+        - Privilege Escalation (TA0004)
+        - Defense Evasion (TA0005)
+        - Credential Access (TA0006)
+        - Discovery (TA0007)
+        - Lateral Movement (TA0008)
+        - Collection (TA0009)
+        - Command and Control (TA0010)
+        - Exfiltration (TA0011)
+        - Impact (TA0012)
+        - Multiple Tactics
+    validations:
+      required: true
+
+  - type: textarea
+    id: mitre_techniques
+    attributes:
+      label: MITRE ATT&CK Techniques
+      description: List specific techniques you're hunting for (include T-codes)
+      placeholder: |
+        T1059.001 - PowerShell
+        T1105 - Ingress Tool Transfer
+        T1027 - Obfuscated Files or Information
+
+  - type: dropdown
+    id: intelligence_source
+    attributes:
+      label: Intelligence Source / Hunt Driver
+      description: What triggered this hunt request?
+      options:
+        - Threat Intelligence (CTI report/feed)
+        - Previous Incident (post-breach analysis)
+        - Industry Alert (vendor/government warning)
+        - Anomalous Behavior (detected by tools/analyst)
+        - Proactive Hunt (scheduled/routine)
+        - Red Team Exercise (validation)
+        - Vulnerability Research (new attack vector)
+        - Compliance Requirement (audit/regulation)
+    validations:
+      required: true
+
+  - type: textarea
+    id: hunt_scope_assets
+    attributes:
+      label: Asset Scope
+      description: Which systems, networks, or user groups should be included?
+      placeholder: |
+        Systems to include:
+        - All Windows endpoints
+        - Domain controllers
+        - High-value servers (list specific ones)
+        - Executive workstations
+        
+        Exclude:
+        - Test/dev environments
+        - Decommissioned systems
+
+  - type: checkboxes
+    id: hunt_timeframe
+    attributes:
+      label: Temporal Scope
+      description: What timeframe should this hunt cover?
+      options:
+        - label: Last 24 hours (recent activity)
+        - label: Last 7 days (weekly baseline)
+        - label: Last 30 days (monthly patterns)
+        - label: Last 90 days (quarterly trends)
+        - label: Custom range (specify in comments)
+        - label: Historical analysis (6+ months)
+        - label: Real-time monitoring
+
+  - type: checkboxes
+    id: required_data_sources
+    attributes:
+      label: Required Data Sources
+      description: Which data sources are needed for this hunt?
+      options:
+        - label: Windows Event Logs (Security, System, Application)
+        - label: Sysmon logs
+        - label: PowerShell transcription/script block logs
+        - label: EDR/Endpoint telemetry
+        - label: Network traffic (NetFlow/PCAP)
+        - label: DNS query logs
+        - label: Proxy/web filtering logs
+        - label: Email security logs
+        - label: Active Directory audit logs
+        - label: Cloud service logs (AWS/Azure/GCP)
+        - label: Application-specific logs
+        - label: Threat intelligence feeds
+
+  - type: textarea
+    id: success_criteria
+    attributes:
+      label: Success Criteria & Expected Outcomes
+      description: How will you measure success? What do you expect to find?
+      placeholder: |
+        Success means:
+        - Confirming presence/absence of suspected TTP
+        - Identifying compromised systems (if any)
+        - Creating/improving detection rules
+        - Documenting normal vs. malicious behavior
+        
+        Expected findings:
+        - Baseline activity levels
+        - Potential true positives
+        - False positive patterns to tune out
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 🔍 EXECUTE Phase Planning
+        *Plan the hunt execution methodology and queries*
+
+  - type: dropdown
+    id: hunt_methodology
+    attributes:
+      label: Hunt Methodology
+      description: What hunting approach will you use?
+      options:
+        - IOC-based (searching for known indicators)
+        - TTP-based (hunting for techniques/behaviors)  
+        - Anomaly-based (statistical deviation detection)
+        - Hypothesis-driven (testing specific theory)
+        - Threat Intelligence-driven (CTI-guided hunt)
+        - Crown Jewel focused (protecting critical assets)
+    validations:
+      required: true
+
+  - type: textarea
+    id: key_hunt_questions
+    attributes:
+      label: Key Hunt Questions
+      description: What specific questions will your hunt answer?
+      placeholder: |
+        1. Are there any PowerShell executions with suspicious characteristics?
+        2. Which systems show evidence of encoded command execution?
+        3. Are there unusual network connections from PowerShell processes?
+        4. What PowerShell activity is normal vs. suspicious in our environment?
+
+  - type: textarea
+    id: initial_search_strategy
+    attributes:
+      label: Initial Search Strategy
+      description: Outline your planned search approach and key queries
+      placeholder: |
+        Phase 1: Broad collection
+        - Query all PowerShell execution events
+        - Identify baseline patterns
+        
+        Phase 2: Focused analysis  
+        - Filter for encoded/obfuscated commands
+        - Correlate with network connections
+        
+        Phase 3: Investigation
+        - Timeline suspicious activities
+        - Validate findings with additional sources
+
+  - type: dropdown
+    id: estimated_effort
+    attributes:
+      label: Estimated Hunt Duration
+      description: How much time do you expect this hunt to require?
+      options:
+        - Quick check (1-2 hours)
+        - Half day hunt (4 hours)
+        - Full day hunt (8 hours)
+        - Multi-day hunt (2-3 days)
+        - Extended hunt (1+ weeks)
+        - Ongoing monitoring
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## ⚡ ACT Phase Planning  
+        *Define response and remediation approach*
+
+  - type: checkboxes
+    id: stakeholder_notification
+    attributes:
+      label: Stakeholder Notification Plan
+      description: Who needs to be informed of hunt progress/results?
+      options:
+        - label: SOC Manager (hunt oversight)
+        - label: Incident Response Team (potential escalation)
+        - label: IT Operations (system impact awareness)
+        - label: Asset owners (affected business units)
+        - label: CISO/Security Leadership (executive briefing)
+        - label: Legal/Compliance (regulatory implications)
+        - label: Threat Intelligence Team (CTI feedback)
+
+  - type: textarea
+    id: escalation_criteria
+    attributes:
+      label: Escalation Criteria
+      description: When should this hunt escalate to an incident?
+      placeholder: |
+        Escalate to incident response if:
+        - Active compromise confirmed
+        - Lateral movement detected  
+        - Data exfiltration identified
+        - Critical systems affected
+        - Executive/VIP systems involved
+
+  - type: textarea
+    id: immediate_actions
+    attributes:
+      label: Planned Immediate Actions
+      description: What actions might you take based on potential findings?
+      placeholder: |
+        If malicious activity found:
+        - Isolate affected systems
+        - Preserve evidence
+        - Update detection rules
+        - Block malicious indicators
+        
+        If activity confirmed benign:
+        - Tune alerting thresholds
+        - Document baseline behavior
+        - Update playbooks
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 🧠 KNOWLEDGE Phase Planning
+        *Plan knowledge capture and sharing*
+
+  - type: checkboxes
+    id: documentation_plan
+    attributes:
+      label: Documentation & Knowledge Sharing
+      description: How will you capture and share hunt results?
+      options:
+        - label: Hunt report (technical findings)
+        - label: Executive summary (business impact)
+        - label: Detection rule updates
+        - label: Playbook improvements
+        - label: IOC/TTP documentation
+        - label: Lessons learned capture
+        - label: Training material updates
+        - label: Threat intelligence contribution
+
+  - type: textarea
+    id: detection_improvements
+    attributes:
+      label: Expected Detection Improvements
+      description: How might this hunt improve future detection capabilities?
+      placeholder: |
+        - New Splunk searches/alerts
+        - SIEM rule enhancements  
+        - EDR policy updates
+        - Baseline behavior documentation
+        - False positive reduction
+
+  - type: checkboxes
+    id: knowledge_sharing_venues
+    attributes:
+      label: Knowledge Sharing Venues
+      description: Where will you share hunt results and lessons learned?
+      options:
+        - label: Team meeting presentation
+        - label: Security wiki/knowledge base
+        - label: Threat hunting community
+        - label: Industry sharing (anonymized)
+        - label: Training program updates
+        - label: Runbook documentation
+        - label: Metrics dashboard updates
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 📋 Additional Context
+
+  - type: textarea
+    id: constraints_considerations
+    attributes:
+      label: Constraints & Special Considerations
+      description: Any limitations, dependencies, or special requirements?
+      placeholder: |
+        Technical constraints:
+        - Data retention limits
+        - System performance impact
+        - Limited access to certain logs
+        
+        Business constraints:
+        - Maintenance windows
+        - Critical business periods
+        - Resource availability
+        
+        Legal/compliance:
+        - Data privacy requirements
+        - Regulatory restrictions
+
+  - type: dropdown
+    id: hunt_classification
+    attributes:
+      label: Hunt Classification
+      description: What's the sensitivity/classification level?
+      options:
+        - Public (can be discussed openly)
+        - Internal (company confidential)
+        - Restricted (security team only)
+        - Classified (executive approval required)
+    validations:
+      required: true
+
+  - type: textarea
+    id: supporting_context
+    attributes:
+      label: Supporting Intelligence & Context
+      description: Any additional context, IOCs, or references that support this hunt?
+      placeholder: |
+        Threat intelligence:
+        - Report references
+        - IOC lists  
+        - Campaign attribution
+        
+        Environmental factors:
+        - Recent changes
+        - Known vulnerabilities
+        - Previous similar activity
+
+  - type: checkboxes
+    id: readiness_checklist
+    attributes:
+      label: Hunt Readiness Checklist
+      description: Confirm readiness before hunt approval
+      options:
+        - label: Hypothesis is clear and testable
+        - label: Required data sources are available
+        - label: Success criteria are defined
+        - label: Stakeholders have been identified
+        - label: Escalation procedures are understood
+        - label: Necessary approvals obtained
+        - label: Hunt conflicts with existing activities checked
+      validations:
+        required: true

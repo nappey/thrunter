@@ -1,0 +1,602 @@
+name: Hypothesis-Driven Threat Hunt
+description: Specialized template for hypothesis-driven threat hunting using the PEAK framework
+title: "[HYPOTHESIS-HUNT] "
+labels: ["threat-hunt", "hypothesis-driven", "peak-framework"]
+projects: ["Security Operations"]
+assignees:
+  - threat-hunting-team
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Hypothesis-Driven Threat Hunt Request
+        
+        **Methodology**: Testing a specific, measurable hypothesis about threat actor behavior
+        **Framework**: Splunk PEAK (Prepare → Execute → Act → Knowledge)
+        
+        A hypothesis-driven hunt starts with a testable theory about how an adversary might operate in your environment.
+
+  - type: input
+    id: hunt_name
+    attributes:
+      label: Hunt Name
+      description: Descriptive name reflecting your hypothesis
+      placeholder: "e.g., 'Domain Admin Credential Harvesting via LSASS', 'C2 Beaconing Over DNS'"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Hunt Priority
+      description: Urgency based on threat assessment and business risk
+      options:
+        - Critical (High confidence threat - immediate)
+        - High (Strong intelligence - within 24 hours)
+        - Medium (Moderate indicators - within week)
+        - Low (Proactive testing - scheduled)
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 🎯 PREPARE Phase - Hypothesis Development
+
+  - type: textarea
+    id: primary_hypothesis
+    attributes:
+      label: Primary Hypothesis Statement
+      description: State your specific, testable hypothesis about adversary behavior
+      placeholder: |
+        "IF [threat actor type] has compromised our environment, 
+         THEN we should observe [specific behaviors/artifacts] 
+         BECAUSE [attack technique/method explanation]"
+        
+        Example: "IF APT29 has gained initial access to our environment, THEN we should observe PowerShell execution with base64 encoding and unusual network connections to external domains BECAUSE they commonly use encoded PowerShell for post-exploitation activities."
+    validations:
+      required: true
+
+  - type: textarea
+    id: hypothesis_rationale
+    attributes:
+      label: Hypothesis Rationale
+      description: Why do you believe this hypothesis is worth testing? What evidence supports it?
+      placeholder: |
+        Supporting evidence:
+        - Recent threat intelligence reports
+        - Industry targeting patterns
+        - Previous incidents in similar organizations
+        - Observed suspicious activity
+        - Environmental factors that make this likely
+        
+        Risk assessment:
+        - Why this threat is relevant to our organization
+        - Potential impact if hypothesis is confirmed
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: hypothesis_characteristics
+    attributes:
+      label: Hypothesis Quality Check
+      description: Verify your hypothesis meets scientific hunting standards
+      options:
+        - label: Specific (clearly defined behavior to look for)
+        - label: Testable (can be proven true or false with available data)
+        - label: Falsifiable (can be disproven if evidence contradicts)
+        - label: Measurable (has quantifiable indicators)
+        - label: Time-bound (has defined temporal scope)
+        - label: Relevant (applies to our threat landscape)
+      validations:
+        required: true
+
+  - type: dropdown
+    id: threat_actor_type
+    attributes:
+      label: Threat Actor Profile
+      description: What type of adversary does your hypothesis focus on?
+      options:
+        - APT/Nation-State (sophisticated, persistent)
+        - Cybercriminal Group (financially motivated)
+        - Insider Threat (malicious employee/contractor)
+        - Script Kiddie/Opportunistic (low-skill, automated)
+        - Hacktivist (ideologically motivated)
+        - Unknown/Generic (behavior-focused, actor-agnostic)
+    validations:
+      required: true
+
+  - type: textarea
+    id: null_hypothesis
+    attributes:
+      label: Null Hypothesis
+      description: State what you would expect to see if your hypothesis is FALSE
+      placeholder: |
+        "If our primary hypothesis is incorrect, we should observe:
+        - Normal baseline activity patterns
+        - No correlation between suspected indicators
+        - Absence of [specific artifacts]
+        - Alternative explanations for any anomalies"
+    validations:
+      required: true
+
+  - type: textarea
+    id: observable_behaviors
+    attributes:
+      label: Observable Behaviors & Artifacts
+      description: What specific evidence would confirm your hypothesis?
+      placeholder: |
+        Network indicators:
+        - Unusual outbound connections to [IP ranges/domains]
+        - DNS queries for [suspicious patterns]
+        - Traffic patterns suggesting [specific protocols/timing]
+        
+        Host indicators:
+        - Process execution patterns: [specific commands/tools]
+        - File system artifacts: [paths, file types, naming]
+        - Registry modifications: [specific keys/values]
+        - Event log patterns: [event IDs, frequency, correlation]
+        
+        Behavioral indicators:
+        - Authentication anomalies: [timing, source, frequency]
+        - Data access patterns: [unusual file access, bulk operations]
+        - Privilege escalation attempts: [specific techniques]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mitre_primary_tactic
+    attributes:
+      label: Primary MITRE ATT&CK Tactic
+      description: Which tactic best represents your hypothesis focus?
+      options:
+        - Initial Access (TA0001) - Entry point methods
+        - Execution (TA0002) - Code execution techniques  
+        - Persistence (TA0003) - Maintaining presence
+        - Privilege Escalation (TA0004) - Higher permissions
+        - Defense Evasion (TA0005) - Avoiding detection
+        - Credential Access (TA0006) - Account compromise
+        - Discovery (TA0007) - Environment reconnaissance
+        - Lateral Movement (TA0008) - Network expansion
+        - Collection (TA0009) - Data gathering
+        - Command and Control (TA0010) - C2 communication
+        - Exfiltration (TA0011) - Data theft
+        - Impact (TA0012) - Destructive actions
+    validations:
+      required: true
+
+  - type: textarea
+    id: mitre_techniques
+    attributes:
+      label: Specific MITRE ATT&CK Techniques
+      description: List the techniques your hypothesis targets (include T-codes and sub-techniques)
+      placeholder: |
+        Primary techniques:
+        - T1059.001 - Command and Scripting Interpreter: PowerShell
+        - T1055 - Process Injection
+        - T1027 - Obfuscated Files or Information
+        
+        Related techniques:
+        - T1105 - Ingress Tool Transfer
+        - T1071.004 - Application Layer Protocol: DNS
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: data_requirements
+    attributes:
+      label: Required Data Sources
+      description: Which data sources are essential to test your hypothesis?
+      options:
+        - label: Windows Security Event Logs (4624, 4625, 4648, etc.)
+        - label: Sysmon logs (process creation, network connections)
+        - label: PowerShell operational/script block logs
+        - label: EDR telemetry (process trees, file access)
+        - label: Network flow data (NetFlow/sFlow)
+        - label: DNS query logs (internal/external)
+        - label: Proxy/web gateway logs
+        - label: Email security logs
+        - label: Active Directory audit logs
+        - label: Cloud service logs (AWS CloudTrail, Azure, etc.)
+        - label: Application-specific logs
+        - label: Memory/forensic artifacts
+
+  - type: textarea
+    id: temporal_scope
+    attributes:
+      label: Temporal Hypothesis Scope
+      description: When would you expect to see this activity? Define your time boundaries.
+      placeholder: |
+        Hunt timeframe: [Start date] to [End date]
+        
+        Expected activity timing:
+        - Business hours vs. after hours
+        - Specific days of week/month
+        - Correlation with business events
+        - Attack campaign timing
+        
+        Justification:
+        - Why this timeframe is relevant
+        - Known threat actor operational patterns
+        - Business context that affects timing
+
+  - type: textarea
+    id: asset_scope_hypothesis
+    attributes:
+      label: Asset Scope & Target Profile
+      description: Which systems would likely be targeted based on your hypothesis?
+      placeholder: |
+        High-probability targets:
+        - Domain controllers (credential access)
+        - Executive workstations (high-value targets)
+        - File servers (data collection)
+        - Internet-facing systems (initial access)
+        
+        Target characteristics:
+        - Systems with [specific software/roles]
+        - Users with [privilege levels/access]
+        - Geographic locations
+        - Business-critical assets
+        
+        Exclusions:
+        - Test/development environments
+        - Known false positive sources
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 🔍 EXECUTE Phase - Testing Methodology
+
+  - type: textarea
+    id: hypothesis_testing_approach
+    attributes:
+      label: Hypothesis Testing Approach
+      description: How will you systematically test your hypothesis?
+      placeholder: |
+        Testing methodology:
+        1. Baseline establishment - measure normal activity
+        2. Anomaly detection - identify deviations from baseline  
+        3. Correlation analysis - link related indicators
+        4. Timeline reconstruction - sequence suspicious events
+        5. Validation - confirm findings with additional sources
+        
+        Statistical approach:
+        - Define normal ranges/thresholds
+        - Calculate confidence intervals
+        - Set significance levels for anomalies
+    validations:
+      required: true
+
+  - type: textarea
+    id: testable_predictions
+    attributes:
+      label: Testable Predictions
+      description: Break down your hypothesis into specific, measurable predictions
+      placeholder: |
+        Prediction 1: IF APT activity present, THEN PowerShell executions will increase by >X% during Y timeframe
+        
+        Prediction 2: IF C2 communication active, THEN DNS queries to suspicious domains will occur every Z minutes
+        
+        Prediction 3: IF lateral movement occurring, THEN authentication events will show unusual source/destination patterns
+        
+        Each prediction should be:
+        - Quantifiable (with thresholds)
+        - Time-bound
+        - Independently testable
+    validations:
+      required: true
+
+  - type: textarea
+    id: hunt_queries_strategy
+    attributes:
+      label: Hunt Queries & Search Strategy
+      description: Outline your planned search approach and key analytical queries
+      placeholder: |
+        Phase 1: Baseline Analysis
+        Query 1: Establish normal PowerShell execution patterns
+        ```
+        index=windows source=WinEventLog:Microsoft-Windows-PowerShell/Operational 
+        | stats count by Computer, hour 
+        | eventstats avg(count) as baseline_avg, stdev(count) as baseline_stdev
+        ```
+        
+        Phase 2: Anomaly Detection  
+        Query 2: Identify PowerShell outliers
+        ```
+        [Hunt query to find deviations from baseline]
+        ```
+        
+        Phase 3: Correlation & Validation
+        Query 3: Correlate suspicious PowerShell with network activity
+        ```
+        [Join query linking process and network events]
+        ```
+
+  - type: checkboxes
+    id: analytical_techniques
+    attributes:
+      label: Analytical Techniques
+      description: Which analysis methods will you employ?
+      options:
+        - label: Statistical analysis (mean, median, standard deviation)
+        - label: Time series analysis (trending, seasonality)
+        - label: Frequency analysis (rare events, outliers)
+        - label: Correlation analysis (event relationships)
+        - label: Clustering analysis (grouping similar behaviors)
+        - label: Machine learning (anomaly detection models)
+        - label: Graph analysis (network relationships)
+        - label: Timeline analysis (chronological sequencing)
+
+  - type: dropdown
+    id: confidence_threshold
+    attributes:
+      label: Confidence Threshold for Findings
+      description: What confidence level will you require to confirm your hypothesis?
+      options:
+        - Very High (95%+ confidence - multiple corroborating sources)
+        - High (85-95% confidence - strong evidence with minor gaps)
+        - Medium (70-85% confidence - good evidence with some uncertainty)
+        - Low (50-70% confidence - preliminary indicators only)
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## ⚡ ACT Phase - Response Planning
+
+  - type: textarea
+    id: hypothesis_confirmation_actions
+    attributes:
+      label: Actions if Hypothesis CONFIRMED
+      description: What will you do if evidence supports your hypothesis?
+      placeholder: |
+        Immediate actions (0-4 hours):
+        - Escalate to incident response team
+        - Preserve evidence on affected systems
+        - Block/monitor identified IOCs
+        - Notify stakeholders per escalation matrix
+        
+        Short-term actions (4-24 hours):
+        - Expand hunt scope to similar systems
+        - Update detection rules based on findings
+        - Coordinate with threat intelligence team
+        - Document attack timeline and TTPs
+        
+        Medium-term actions (1-7 days):
+        - Conduct damage assessment
+        - Implement additional monitoring
+        - Update playbooks with lessons learned
+    validations:
+      required: true
+
+  - type: textarea
+    id: hypothesis_rejection_actions
+    attributes:
+      label: Actions if Hypothesis REJECTED
+      description: What will you do if evidence contradicts your hypothesis?
+      placeholder: |
+        Analysis actions:
+        - Document why hypothesis was rejected
+        - Analyze alternative explanations for observed data
+        - Refine hypothesis for future testing
+        - Update threat models based on findings
+        
+        Process improvements:
+        - Adjust baseline calculations
+        - Tune detection thresholds  
+        - Update hunting methodologies
+        - Share negative results with team
+        
+        Value extraction:
+        - Validate security controls are working
+        - Confirm baseline behavior understanding
+        - Improve false positive filtering
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: escalation_triggers
+    attributes:
+      label: Escalation Triggers
+      description: What findings would trigger immediate escalation?
+      options:
+        - label: Active compromise confirmed (C2 communication detected)
+        - label: Credential theft evidence (password dumps, ticket harvesting)
+        - label: Lateral movement detected (unusual authentication patterns)
+        - label: Data exfiltration indicators (large/unusual transfers)
+        - label: Persistence mechanisms found (scheduled tasks, services)
+        - label: Privilege escalation confirmed (unauthorized admin access)
+        - label: Critical system impact (domain controllers, servers)
+        - label: Executive/VIP targeting (C-suite, board members)
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 🧠 KNOWLEDGE Phase - Learning & Improvement
+
+  - type: textarea
+    id: hypothesis_documentation_plan
+    attributes:
+      label: Hypothesis Documentation Strategy
+      description: How will you document your hypothesis testing process and results?
+      placeholder: |
+        Documentation components:
+        - Hypothesis statement and rationale
+        - Testing methodology and queries used
+        - Statistical analysis and confidence levels
+        - Evidence collected (confirmed/contradictory)
+        - Conclusions and confidence assessment
+        - Lessons learned and methodology improvements
+        
+        Formats:
+        - Technical hunt report
+        - Executive summary
+        - Methodology documentation
+        - Query library updates
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: detection_engineering_outcomes
+    attributes:
+      label: Expected Detection Engineering Outcomes
+      description: How will this hunt improve future detection capabilities?
+      options:
+        - label: New detection rules/signatures
+        - label: Improved baseline calculations
+        - label: Enhanced correlation rules
+        - label: Better false positive filtering
+        - label: Updated alerting thresholds
+        - label: New hunting playbooks
+        - label: Threat intelligence enrichment
+        - label: Attack surface documentation
+
+  - type: textarea
+    id: hypothesis_refinement
+    attributes:
+      label: Hypothesis Refinement Plan
+      description: How might you refine this hypothesis for future hunts?
+      placeholder: |
+        If hypothesis confirmed:
+        - Expand to related techniques/tactics
+        - Test variations of the attack method
+        - Investigate different threat actors using same TTP
+        - Explore detection evasion attempts
+        
+        If hypothesis rejected:
+        - Adjust assumptions about attacker behavior
+        - Modify temporal or asset scope
+        - Consider alternative attack vectors
+        - Test sub-components independently
+        
+        Methodology improvements:
+        - Refine statistical models
+        - Improve data quality/coverage
+        - Enhance correlation techniques
+
+  - type: checkboxes
+    id: knowledge_sharing_plan
+    attributes:
+      label: Knowledge Sharing Strategy
+      description: How will you share hypothesis results and methodology?
+      options:
+        - label: Team presentation (methodology and findings)
+        - label: Hunt playbook updates
+        - label: Detection rule documentation
+        - label: Threat hunting community sharing
+        - label: Industry collaboration (anonymized)
+        - label: Training material updates
+        - label: Research publication (if novel)
+        - label: Conference presentation
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 📊 Success Metrics & Validation
+
+  - type: textarea
+    id: success_metrics
+    attributes:
+      label: Hypothesis Hunt Success Metrics
+      description: How will you measure the success of this hypothesis-driven hunt?
+      placeholder: |
+        Quantitative metrics:
+        - Hypothesis confidence level achieved (%)
+        - Data coverage completeness (% of required sources)
+        - False positive rate (%)
+        - Time to conclusion (hours/days)
+        
+        Qualitative metrics:
+        - Quality of evidence collected
+        - Clarity of conclusions reached
+        - Actionability of findings
+        - Methodology effectiveness
+        
+        Learning metrics:
+        - New TTPs documented
+        - Detection improvements implemented
+        - Process refinements identified
+    validations:
+      required: true
+
+  - type: dropdown
+    id: estimated_duration
+    attributes:
+      label: Estimated Hunt Duration
+      description: How long do you expect this hypothesis testing to take?
+      options:
+        - Quick test (2-4 hours)
+        - Single day hunt (8 hours)
+        - Multi-day analysis (2-3 days)
+        - Extended investigation (1 week)
+        - Deep research hunt (2+ weeks)
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation_approach
+    attributes:
+      label: Findings Validation Approach
+      description: How will you validate your conclusions?
+      placeholder: |
+        Primary validation:
+        - Cross-reference multiple data sources
+        - Statistical significance testing
+        - Timeline correlation analysis
+        - Independent analyst review
+        
+        Secondary validation:
+        - External threat intelligence confirmation
+        - Similar environment comparison
+        - Red team exercise validation
+        - Forensic artifact confirmation
+        
+        Peer review:
+        - Hunt methodology review
+        - Statistical analysis verification
+        - Conclusion logic assessment
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context & Considerations
+      description: Any other relevant information for this hypothesis-driven hunt?
+      placeholder: |
+        Environmental factors:
+        - Recent network/system changes
+        - Business events that might affect data
+        - Known false positive sources
+        - Data quality limitations
+        
+        Resource considerations:
+        - Available analyst time
+        - System performance impact
+        - Data processing requirements
+        
+        Coordination needs:
+        - Stakeholder communication plan
+        - Potential impact on operations
+        - Legal/compliance requirements
+
+  - type: checkboxes
+    id: hypothesis_hunt_checklist
+    attributes:
+      label: Hypothesis Hunt Readiness Checklist
+      description: Confirm readiness before beginning hypothesis testing
+      options:
+        - label: Hypothesis is specific, testable, and falsifiable
+        - label: Observable behaviors clearly defined
+        - label: Required data sources confirmed available
+        - label: Testing methodology planned and documented
+        - label: Success criteria and confidence thresholds set
+        - label: Escalation procedures understood
+        - label: Documentation strategy defined
+        - label: Peer review process arranged
+      validations:
+        required: true
