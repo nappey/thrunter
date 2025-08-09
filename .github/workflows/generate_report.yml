@@ -1,0 +1,435 @@
+name: Generate Threat Hunt Report
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  issues: read
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+    if: contains(github.event.label.name, 'completed')
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Generate Hunt Report
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          // Get issue data
+          const issue = context.payload.issue;
+          const issueNumber = issue.number;
+          const issueTitle = issue.title;
+          const issueBody = issue.body || '';
+          const issueAuthor = issue.user.login;
+          const issueCreated = new Date(issue.created_at).toISOString().split('T')[0];
+          const issueUpdated = new Date(issue.updated_at).toISOString().split('T')[0];
+          
+          // Get issue comments
+          const comments = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issueNumber
+          });
+          
+          // Determine hunt type from title
+          let huntType = 'General';
+          if (issueTitle.includes('[HYPOTHESIS-HUNT]')) {
+            huntType = 'Hypothesis-Driven';
+          } else if (issueTitle.includes('[BASELINE-HUNT]')) {
+            huntType = 'Baseline Analysis';
+          } else if (issueTitle.includes('[HUNT]')) {
+            huntType = 'General Hunt';
+          }
+          
+          // Extract hunt name from title (remove prefix)
+          const huntName = issueTitle.replace(/^\[.*?\]\s*/, '').trim();
+          
+          // Parse issue body to extract key information
+          function extractValue(body, fieldName) {
+            const regex = new RegExp(`### ${fieldName}\\s*\\n([\\s\\S]*?)(?=\\n### |$)`, 'i');
+            const match = body.match(regex);
+            return match ? match[1].trim() : 'Not specified';
+          }
+          
+          function extractCheckboxes(body, fieldName) {
+            const regex = new RegExp(`### ${fieldName}\\s*\\n([\\s\\S]*?)(?=\\n### |$)`, 'i');
+            const match = body.match(regex);
+            if (!match) return [];
+            
+            const checkboxes = match[1].match(/- \[x\] (.+)/g);
+            return checkboxes ? checkboxes.map(cb => cb.replace('- [x] ', '').trim()) : [];
+          }
+          
+          function extractDropdown(body, fieldName) {
+            const regex = new RegExp(`### ${fieldName}\\s*\\n([^\\n]+)`, 'i');
+            const match = body.match(regex);
+            return match ? match[1].trim() : 'Not specified';
+          }
+          
+          // Extract key fields based on hunt type
+          let extractedData = {};
+          
+          if (huntType === 'Hypothesis-Driven') {
+            extractedData = {
+              hypothesis: extractValue(issueBody, 'Primary Hypothesis Statement'),
+              rationale: extractValue(issueBody, 'Hypothesis Rationale'),
+              nullHypothesis: extractValue(issueBody, 'Null Hypothesis'),
+              observableBehaviors: extractValue(issueBody, 'Observable Behaviors & Artifacts'),
+              mitreTactics: extractDropdown(issueBody, 'Primary MITRE ATT&CK Tactic'),
+              mitreTechniques: extractValue(issueBody, 'Specific MITRE ATT&CK Techniques'),
+              testingApproach: extractValue(issueBody, 'Hypothesis Testing Approach'),
+              predictions: extractValue(issueBody, 'Testable Predictions'),
+              dataSources: extractCheckboxes(issueBody, 'Required Data Sources'),
+              confirmedActions: extractValue(issueBody, 'Actions if Hypothesis CONFIRMED'),
+              rejectedActions: extractValue(issueBody, 'Actions if Hypothesis REJECTED')
+            };
+          } else if (huntType === 'Baseline Analysis') {
+            extractedData = {
+              baselineType: extractDropdown(issueBody, 'Baseline Hunt Type'),
+              objective: extractValue(issueBody, 'Baseline Objective'),
+              scopeType: extractDropdown(issueBody, 'Baseline Scope Type'),
+              scopeDetails: extractValue(issueBody, 'Detailed Scope Definition'),
+              expectedPatterns: extractValue(issueBody, 'Expected Normal Patterns'),
+              dataSources: extractCheckboxes(issueBody, 'Required Data Sources for Baseline'),
+              statisticalApproach: extractDropdown(issueBody, 'Statistical Analysis Approach'),
+              metrics: extractValue(issueBody, 'Key Baseline Metrics'),
+              normalRanges: extractValue(issueBody, 'Normal Range Definitions'),
+              validationProcess: extractValue(issueBody, 'Baseline Validation Process')
+            };
+          } else {
+            // General hunt fields
+            extractedData = {
+              hypothesis: extractValue(issueBody, 'Hunt Hypothesis'),
+              scope: extractValue(issueBody, 'Asset Scope & Target Profile'),
+              dataSources: extractCheckboxes(issueBody, 'Required Data Sources'),
+              methodology: extractValue(issueBody, 'Hunt Methodology'),
+              expectedOutcomes: extractValue(issueBody, 'Expected Outcomes')
+            };
+          }
+          
+          // Extract common fields
+          const priority = extractDropdown(issueBody, 'Hunt Priority') || extractDropdown(issueBody, 'Priority Level');
+          const duration = extractDropdown(issueBody, 'Estimated Hunt Duration') || extractDropdown(issueBody, 'Expected Hunt Duration');
+          
+          // Format comments for hunter notes
+          let hunterNotes = '';
+          if (comments.data.length > 0) {
+            hunterNotes = comments.data.map(comment => {
+              const author = comment.user.login;
+              const date = new Date(comment.created_at).toISOString().split('T')[0];
+              const body = comment.body;
+              return `**${author}** (${date}):\n${body}\n`;
+            }).join('\n---\n\n');
+          } else {
+            hunterNotes = 'No comments were added during the hunt.';
+          }
+          
+          // Generate the markdown report
+          const reportContent = `# Threat Hunt Report: ${huntName}
+          
+          **Hunt ID:** TH-${issueCreated.replace(/-/g, '')}-${issueNumber.toString().padStart(3, '0')}  
+          **Hunt Type:** ${huntType}  
+          **Issue Number:** #${issueNumber}  
+          **Hunt Lead:** ${issueAuthor}  
+          **Date Created:** ${issueCreated}  
+          **Date Completed:** ${issueUpdated}  
+          **Priority:** ${priority}  
+          **Estimated Duration:** ${duration}  
+          
+          ---
+          
+          ## Executive Summary
+          
+          This report documents the completion of the "${huntName}" threat hunt, conducted as part of our proactive threat hunting program. The hunt was initiated on ${issueCreated} and completed on ${issueUpdated}.
+          
+          **Hunt Objective:** ${huntType === 'Hypothesis-Driven' ? extractedData.hypothesis : (huntType === 'Baseline Analysis' ? extractedData.objective : extractedData.hypothesis)}
+          
+          ${huntType === 'Hypothesis-Driven' ? `
+          ## Hypothesis Testing Results
+          
+          ### Primary Hypothesis
+          ${extractedData.hypothesis}
+          
+          ### Null Hypothesis
+          ${extractedData.nullHypothesis}
+          
+          ### Hypothesis Rationale
+          ${extractedData.rationale}
+          
+          ### Observable Behaviors Sought
+          ${extractedData.observableBehaviors}
+          
+          ### Testing Methodology
+          ${extractedData.testingApproach}
+          
+          ### Testable Predictions
+          ${extractedData.predictions}
+          
+          ### MITRE ATT&CK Mapping
+          **Primary Tactic:** ${extractedData.mitreTactics}
+          
+          **Techniques:**
+          ${extractedData.mitreTechniques}
+          
+          ### Response Planning
+          **If Hypothesis Confirmed:**
+          ${extractedData.confirmedActions}
+          
+          **If Hypothesis Rejected:**
+          ${extractedData.rejectedActions}
+          ` : ''}
+          
+          ${huntType === 'Baseline Analysis' ? `
+          ## Baseline Analysis Results
+          
+          ### Baseline Type
+          ${extractedData.baselineType}
+          
+          ### Baseline Objective
+          ${extractedData.objective}
+          
+          ### Scope Definition
+          **Scope Type:** ${extractedData.scopeType}
+          
+          **Detailed Scope:**
+          ${extractedData.scopeDetails}
+          
+          ### Expected Normal Patterns
+          ${extractedData.expectedPatterns}
+          
+          ### Statistical Approach
+          ${extractedData.statisticalApproach}
+          
+          ### Key Metrics Analyzed
+          ${extractedData.metrics}
+          
+          ### Normal Range Definitions
+          ${extractedData.normalRanges}
+          
+          ### Validation Process
+          ${extractedData.validationProcess}
+          ` : ''}
+          
+          ${huntType === 'General Hunt' ? `
+          ## Hunt Details
+          
+          ### Hunt Hypothesis/Objective
+          ${extractedData.hypothesis}
+          
+          ### Scope
+          ${extractedData.scope}
+          
+          ### Methodology
+          ${extractedData.methodology}
+          
+          ### Expected Outcomes
+          ${extractedData.expectedOutcomes}
+          ` : ''}
+          
+          ## Data Sources Utilized
+          
+          ${extractedData.dataSources.length > 0 ? extractedData.dataSources.map(source => `- ${source}`).join('\n') : 'No specific data sources were documented.'}
+          
+          ## Hunter Notes
+          
+          The following section contains comments, observations, and notes from the hunting team during the course of this investigation:
+          
+          ${hunterNotes}
+          
+          ---
+          
+          ## Findings & Results
+          
+          > **Note:** This section should be manually updated with actual hunt findings, evidence, and conclusions.
+          
+          ### Key Findings
+          - [ ] **Finding 1:** [Description of finding]
+            - Evidence: [Supporting evidence]
+            - Impact: [Assessment of impact]
+            - Confidence: [High/Medium/Low]
+          
+          - [ ] **Finding 2:** [Description of finding]
+            - Evidence: [Supporting evidence]  
+            - Impact: [Assessment of impact]
+            - Confidence: [High/Medium/Low]
+          
+          ### Evidence Collected
+          - [ ] [Evidence item 1]
+          - [ ] [Evidence item 2]
+          - [ ] [Evidence item 3]
+          
+          ### IOCs Identified
+          - [ ] **IP Addresses:** [List any malicious IPs]
+          - [ ] **Domains:** [List any malicious domains]
+          - [ ] **File Hashes:** [List any malicious file hashes]
+          - [ ] **Process Names:** [List any suspicious processes]
+          
+          ## Conclusions
+          
+          ### Hypothesis Assessment
+          - [ ] **Hypothesis Confirmed** - Evidence supports the original hypothesis
+          - [ ] **Hypothesis Rejected** - Evidence contradicts the original hypothesis  
+          - [ ] **Inconclusive** - Insufficient evidence to confirm or reject
+          
+          ### Risk Assessment
+          - [ ] **No Risk Identified** - No malicious activity found
+          - [ ] **Low Risk** - Minor security gaps or configuration issues
+          - [ ] **Medium Risk** - Moderate security concerns requiring attention
+          - [ ] **High Risk** - Significant security issues requiring immediate action
+          - [ ] **Critical Risk** - Active compromise or imminent threat detected
+          
+          ### Confidence Level
+          - [ ] **High Confidence** (90-100%) - Multiple corroborating sources
+          - [ ] **Medium Confidence** (70-89%) - Good evidence with minor gaps
+          - [ ] **Low Confidence** (50-69%) - Limited or circumstantial evidence
+          
+          ## Recommendations & Next Steps
+          
+          ### Immediate Actions (0-24 hours)
+          - [ ] [Action item 1]
+          - [ ] [Action item 2]
+          - [ ] [Action item 3]
+          
+          ### Short-term Actions (1-7 days)
+          - [ ] [Action item 1]
+          - [ ] [Action item 2]
+          - [ ] [Action item 3]
+          
+          ### Long-term Actions (1+ weeks)
+          - [ ] [Action item 1]
+          - [ ] [Action item 2]
+          - [ ] [Action item 3]
+          
+          ## Detection Improvements
+          
+          ### New Detection Rules
+          - [ ] [Rule 1]: [Description and purpose]
+          - [ ] [Rule 2]: [Description and purpose]
+          
+          ### Enhanced Monitoring
+          - [ ] [Monitoring enhancement 1]
+          - [ ] [Monitoring enhancement 2]
+          
+          ### Process Improvements
+          - [ ] [Process improvement 1]
+          - [ ] [Process improvement 2]
+          
+          ## Lessons Learned
+          
+          ### What Worked Well
+          - [Effective technique or approach]
+          - [Useful data source or tool]
+          - [Good team coordination]
+          
+          ### Areas for Improvement
+          - [Data gap or limitation identified]
+          - [Process improvement needed]
+          - [Tool enhancement required]
+          
+          ### Future Hunt Recommendations
+          - [Suggestion for future hunts]
+          - [Methodology improvement]
+          - [Additional data sources to consider]
+          
+          ## Metrics
+          
+          - **Total Hunt Duration:** [X hours/days]
+          - **Data Volume Analyzed:** [X GB/TB]
+          - **Systems Examined:** [X systems]
+          - **Queries Executed:** [X searches]
+          - **False Positive Rate:** [X%]
+          - **True Positives Found:** [X]
+          
+          ---
+          
+          **Report Generated:** ${new Date().toISOString().split('T')[0]}  
+          **Generated By:** GitHub Action (Threat Hunt Report Generator)  
+          **Source Issue:** [#${issueNumber}](${issue.html_url})
+          
+          > This report was automatically generated from GitHub Issue #${issueNumber}. Please review and update the Findings, Conclusions, and Recommendations sections with actual hunt results.
+          `;
+          
+          // Create reports directory if it doesn't exist
+          const reportsDir = 'hunt-reports';
+          if (!fs.existsSync(reportsDir)) {
+            fs.mkdirSync(reportsDir, { recursive: true });
+          }
+          
+          // Generate filename
+          const sanitizedHuntName = huntName.replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase();
+          const filename = `${reportsDir}/hunt-report-${issueCreated}-${issueNumber}-${sanitizedHuntName}.md`;
+          
+          // Write the report file
+          fs.writeFileSync(filename, reportContent);
+          
+          console.log(`Generated threat hunt report: ${filename}`);
+          
+          // Commit and push the report
+          const { execSync } = require('child_process');
+          
+          try {
+            execSync('git config --local user.email "action@github.com"');
+            execSync('git config --local user.name "GitHub Action"');
+            execSync(`git add "${filename}"`);
+            execSync(`git commit -m "Generate threat hunt report for issue #${issueNumber}: ${huntName}"`);
+            execSync('git push');
+            
+            // Comment on the issue with link to report
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: `🎯 **Threat Hunt Report Generated**
+
+A comprehensive hunt report has been automatically generated and saved to: \`${filename}\`
+
+The report includes:
+- Hunt details and methodology from the issue
+- All comments as "Hunter Notes"
+- Template sections for findings and conclusions
+- Recommendations and next steps
+
+Please review and update the report with actual hunt findings, evidence, and conclusions.
+
+📄 [View the generated report](${filename})`
+            });
+            
+          } catch (error) {
+            console.error('Error committing report:', error.message);
+            
+            // Still comment on issue even if commit failed
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: `⚠️ **Hunt Report Generated (Commit Failed)**
+
+A threat hunt report was generated but could not be automatically committed to the repository. The report content is available in the action logs.
+
+Please manually save the following report to your hunt-reports directory:
+
+\`\`\`
+Filename: ${filename}
+\`\`\`
+
+The report includes all issue details and comments as hunter notes.`
+            });
+          }
