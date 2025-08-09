@@ -55,8 +55,6 @@ body:
          BECAUSE [attack technique/method explanation]"
         
         Example: "IF APT29 has gained initial access to our environment, THEN we should observe PowerShell execution with base64 encoding and unusual network connections to external domains BECAUSE they commonly use encoded PowerShell for post-exploitation activities."
-    validations:
-      required: true
 
   - type: textarea
     id: hypothesis_rationale
@@ -74,8 +72,6 @@ body:
         Risk assessment:
         - Why this threat is relevant to our organization
         - Potential impact if hypothesis is confirmed
-    validations:
-      required: true
 
   - type: checkboxes
     id: hypothesis_characteristics
@@ -118,8 +114,6 @@ body:
         - No correlation between suspected indicators
         - Absence of [specific artifacts]
         - Alternative explanations for any anomalies"
-    validations:
-      required: true
 
   - type: textarea
     id: observable_behaviors
@@ -142,8 +136,6 @@ body:
         - Authentication anomalies: [timing, source, frequency]
         - Data access patterns: [unusual file access, bulk operations]
         - Privilege escalation attempts: [specific techniques]
-    validations:
-      required: true
 
   - type: dropdown
     id: mitre_primary_tactic
@@ -180,8 +172,6 @@ body:
         Related techniques:
         - T1105 - Ingress Tool Transfer
         - T1071.004 - Application Layer Protocol: DNS
-    validations:
-      required: true
 
   - type: checkboxes
     id: data_requirements
@@ -266,8 +256,6 @@ body:
         - Define normal ranges/thresholds
         - Calculate confidence intervals
         - Set significance levels for anomalies
-    validations:
-      required: true
 
   - type: textarea
     id: testable_predictions
@@ -285,8 +273,6 @@ body:
         - Quantifiable (with thresholds)
         - Time-bound
         - Independently testable
-    validations:
-      required: true
 
   - type: textarea
     id: hunt_queries_strategy
@@ -370,8 +356,6 @@ body:
         - Conduct damage assessment
         - Implement additional monitoring
         - Update playbooks with lessons learned
-    validations:
-      required: true
 
   - type: textarea
     id: hypothesis_rejection_actions
@@ -395,8 +379,6 @@ body:
         - Validate security controls are working
         - Confirm baseline behavior understanding
         - Improve false positive filtering
-    validations:
-      required: true
 
   - type: checkboxes
     id: escalation_triggers
@@ -438,8 +420,6 @@ body:
         - Executive summary
         - Methodology documentation
         - Query library updates
-    validations:
-      required: true
 
   - type: checkboxes
     id: detection_engineering_outcomes
@@ -522,8 +502,6 @@ body:
         - New TTPs documented
         - Detection improvements implemented
         - Process refinements identified
-    validations:
-      required: true
 
   - type: dropdown
     id: estimated_duration
