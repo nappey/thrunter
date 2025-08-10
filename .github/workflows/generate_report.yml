@@ -417,21 +417,25 @@ jobs:
           const sanitizedHuntName = huntName.replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase();
           const filename = `hunt-reports/hunt-report-${issueCreated}-${issue.number}-${sanitizedHuntName}.md`;
           
+          const commentBody = [
+            '🎯 **Threat Hunt Report Generated**',
+            '',
+            'A comprehensive hunt report has been automatically generated and saved to: `' + filename + '`',
+            '',
+            'The report includes:',
+            '- Hunt details and metadata extracted from the issue form',
+            '- All comments as "Hunter Notes"',
+            '- Template sections for findings and conclusions', 
+            '- Recommendations and next steps',
+            '',
+            'Please review and update the report with actual hunt findings, evidence, and conclusions.',
+            '',
+            '📄 [View the generated report](' + filename + ')'
+          ].join('\n');
+          
           await github.rest.issues.createComment({
             owner: context.repo.owner,
             repo: context.repo.repo,
             issue_number: issue.number,
-            body: `🎯 **Threat Hunt Report Generated**
-
-A comprehensive hunt report has been automatically generated and saved to: \`${filename}\`
-
-The report includes:
-- Hunt details and metadata extracted from the issue form
-- All comments as "Hunter Notes" 
-- Template sections for findings and conclusions
-- Recommendations and next steps
-
-Please review and update the report with actual hunt findings, evidence, and conclusions.
-
-📄 [View the generated report](${filename})`
+            body: commentBody
           });
