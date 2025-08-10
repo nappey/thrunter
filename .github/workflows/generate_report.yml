@@ -136,6 +136,9 @@ jobs:
           return hunterNotes;
 
     - name: Create Report Content
+      env:
+        EXTRACTED_DATA: ${{ steps.extract-data.outputs.result }}
+        HUNTER_NOTES: ${{ steps.get-notes.outputs.result }}
       uses: actions/github-script@v7
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -143,8 +146,8 @@ jobs:
           const fs = require('fs');
           
           const issue = context.payload.issue;
-          const extractedData = JSON.parse('${{ steps.extract-data.outputs.result }}');
-          const hunterNotes = '${{ steps.get-notes.outputs.result }}';
+          const extractedData = JSON.parse(process.env.EXTRACTED_DATA);
+          const hunterNotes = process.env.HUNTER_NOTES;
           
           let huntSpecificSection = '';
           
