@@ -383,39 +383,41 @@ jobs:
             const confirmedActions = extractFieldValue(issueBody, 'Actions if Hypothesis CONFIRMED');
             const rejectedActions = extractFieldValue(issueBody, 'Actions if Hypothesis REJECTED');
             
-            huntSpecificSection = `## Hypothesis-Driven Hunt Details
-
-### Primary Hypothesis
-${hypothesis || '*Not specified*'}
-
-### Hypothesis Rationale  
-${rationale || '*Not specified*'}
-
-### Null Hypothesis
-${nullHypothesis || '*Not specified*'}
-
-### Observable Behaviors & Artifacts
-${observableBehaviors || '*Not specified*'}
-
-### MITRE ATT&CK Mapping
-**Primary Tactic:** ${mitreTactic}
-
-**Specific Techniques:**
-${mitreTechniques || '*Not specified*'}
-
-### Testing Methodology
-${testingApproach || '*Not specified*'}
-
-### Testable Predictions
-${predictions || '*Not specified*'}
-
-### Response Planning
-
-**Actions if Hypothesis CONFIRMED:**
-${confirmedActions || '*Not specified*'}
-
-**Actions if Hypothesis REJECTED:**
-${rejectedActions || '*Not specified*'}`;
+            huntSpecificSection = [
+              '## Hypothesis-Driven Hunt Details',
+              '',
+              '### Primary Hypothesis',
+              hypothesis || '*Not specified*',
+              '',
+              '### Hypothesis Rationale',
+              rationale || '*Not specified*',
+              '',
+              '### Null Hypothesis', 
+              nullHypothesis || '*Not specified*',
+              '',
+              '### Observable Behaviors & Artifacts',
+              observableBehaviors || '*Not specified*',
+              '',
+              '### MITRE ATT&CK Mapping',
+              '**Primary Tactic:** ' + mitreTactic,
+              '',
+              '**Specific Techniques:**',
+              mitreTechniques || '*Not specified*',
+              '',
+              '### Testing Methodology',
+              testingApproach || '*Not specified*',
+              '',
+              '### Testable Predictions',
+              predictions || '*Not specified*',
+              '',
+              '### Response Planning',
+              '',
+              '**Actions if Hypothesis CONFIRMED:**',
+              confirmedActions || '*Not specified*',
+              '',
+              '**Actions if Hypothesis REJECTED:**',
+              rejectedActions || '*Not specified*'
+            ].join('\n');
 
           } else if (huntType === 'Baseline Analysis') {
             const baselineType = extractDropdownValue(issueBody, 'Baseline Hunt Type');
@@ -428,34 +430,36 @@ ${rejectedActions || '*Not specified*'}`;
             const normalRanges = extractFieldValue(issueBody, 'Normal Range Definitions');
             const validationProcess = extractFieldValue(issueBody, 'Baseline Validation Process');
             
-            huntSpecificSection = `## Baseline Analysis Hunt Details
-
-### Baseline Type
-${baselineType}
-
-### Baseline Objective
-${objective || '*Not specified*'}
-
-### Scope Definition
-**Scope Type:** ${scopeType}
-
-**Detailed Scope:**
-${scopeDetails || '*Not specified*'}
-
-### Expected Normal Patterns
-${expectedPatterns || '*Not specified*'}
-
-### Statistical Analysis Approach
-${statisticalApproach}
-
-### Key Baseline Metrics
-${metrics || '*Not specified*'}
-
-### Normal Range Definitions
-${normalRanges || '*Not specified*'}
-
-### Validation Process
-${validationProcess || '*Not specified*'}`;
+            huntSpecificSection = [
+              '## Baseline Analysis Hunt Details',
+              '',
+              '### Baseline Type',
+              baselineType,
+              '',
+              '### Baseline Objective',
+              objective || '*Not specified*',
+              '',
+              '### Scope Definition',
+              '**Scope Type:** ' + scopeType,
+              '',
+              '**Detailed Scope:**',
+              scopeDetails || '*Not specified*',
+              '',
+              '### Expected Normal Patterns',
+              expectedPatterns || '*Not specified*',
+              '',
+              '### Statistical Analysis Approach',
+              statisticalApproach,
+              '',
+              '### Key Baseline Metrics',
+              metrics || '*Not specified*',
+              '',
+              '### Normal Range Definitions',
+              normalRanges || '*Not specified*',
+              '',
+              '### Validation Process',
+              validationProcess || '*Not specified*'
+            ].join('\n');
 
           } else {
             // General hunt
@@ -464,19 +468,21 @@ ${validationProcess || '*Not specified*'}`;
             const methodology = extractFieldValue(issueBody, 'Hunt Methodology');
             const expectedOutcomes = extractFieldValue(issueBody, 'Expected Outcomes');
             
-            huntSpecificSection = `## General Hunt Details
-
-### Hunt Hypothesis/Objective
-${huntHypothesis || '*Not specified*'}
-
-### Scope
-${scope || '*Not specified*'}
-
-### Methodology  
-${methodology || '*Not specified*'}
-
-### Expected Outcomes
-${expectedOutcomes || '*Not specified*'}`;
+            huntSpecificSection = [
+              '## General Hunt Details',
+              '',
+              '### Hunt Hypothesis/Objective',
+              huntHypothesis || '*Not specified*',
+              '',
+              '### Scope',
+              scope || '*Not specified*',
+              '',
+              '### Methodology',
+              methodology || '*Not specified*',
+              '',
+              '### Expected Outcomes',
+              expectedOutcomes || '*Not specified*'
+            ].join('\n');
           }
           
           // Extract data sources
@@ -495,22 +501,22 @@ ${expectedOutcomes || '*Not specified*'}`;
           
           // Create the complete report
           const reportLines = [
-            `# Threat Hunt Report: ${huntName}`,
+            '# Threat Hunt Report: ' + huntName,
             '',
-            `**Hunt ID:** TH-${issueCreated.replace(/-/g, '')}-${issueNumber.toString().padStart(3, '0')}`,
-            `**Hunt Type:** ${huntType}`,
-            `**Issue Number:** [#${issueNumber}](${issue.html_url})`,
-            `**Hunt Lead:** ${issueAuthor}`,
-            `**Date Created:** ${issueCreated}`,
-            `**Date Completed:** ${issueUpdated}`,
-            `**Priority:** ${priority}`,
-            `**Estimated Duration:** ${duration}`,
+            '**Hunt ID:** TH-' + issueCreated.replace(/-/g, '') + '-' + issueNumber.toString().padStart(3, '0'),
+            '**Hunt Type:** ' + huntType,
+            '**Issue Number:** [#' + issueNumber + '](' + issue.html_url + ')',
+            '**Hunt Lead:** ' + issueAuthor,
+            '**Date Created:** ' + issueCreated,
+            '**Date Completed:** ' + issueUpdated,
+            '**Priority:** ' + priority,
+            '**Estimated Duration:** ' + duration,
             '',
             '---',
             '',
             '## Executive Summary',
             '',
-            `This report documents the completion of the "${huntName}" threat hunt, conducted as part of our proactive threat hunting program. The hunt was initiated on ${issueCreated} and completed on ${issueUpdated}.`,
+            'This report documents the completion of the "' + huntName + '" threat hunt, conducted as part of our proactive threat hunting program. The hunt was initiated on ' + issueCreated + ' and completed on ' + issueUpdated + '.',
             '',
             huntSpecificSection,
             '',
@@ -529,7 +535,7 @@ ${expectedOutcomes || '*Not specified*'}`;
           }
           
           // Add hunter notes section
-          reportLines.push(...[
+          const finalSections = [
             '## Hunter Notes',
             '',
             'The following section contains comments, observations, and notes from the hunting team during the course of this investigation:',
@@ -666,15 +672,17 @@ ${expectedOutcomes || '*Not specified*'}`;
             '',
             '## Report Metadata',
             '',
-            `**Report Generated:** ${new Date().toISOString().split('T')[0]}`,
-            `**Generated By:** GitHub Action (Threat Hunt Report Generator)`,
-            `**Source Issue:** [#${issueNumber}](${issue.html_url})`,
-            `**Last Updated:** ${new Date().toISOString()}`,
+            '**Report Generated:** ' + new Date().toISOString().split('T')[0],
+            '**Generated By:** GitHub Action (Threat Hunt Report Generator)',
+            '**Source Issue:** [#' + issueNumber + '](' + issue.html_url + ')',
+            '**Last Updated:** ' + new Date().toISOString(),
             '',
             '---',
             '',
             '*This report was automatically generated from GitHub Issue data and hunter comments. Please review and update the Findings, Conclusions, and Recommendations sections with actual hunt results before finalizing.*'
-          ]);
+          ];
+          
+          reportLines.push(...finalSections);
           
           const reportContent = reportLines.join('\n');
           
