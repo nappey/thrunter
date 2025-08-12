@@ -12,7 +12,7 @@ permissions:
 jobs:
   generate-report:
     runs-on: ubuntu-latest
-    if: contains(github.event.label.name, 'bug')
+    if: contains(github.event.label.name, 'complete')
     
     steps:
     - name: Checkout repository
