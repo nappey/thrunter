@@ -64,11 +64,7 @@ jobs:
             NEWLINE=$'\n'
             
             if [[ -n "$HUNTER_NOTES" ]]; then
-              HUNTER_NOTES="$HUNTER_NOTES
-
-              ---
-              
-              "
+              HUNTER_NOTES="$HUNTER_NOTES$NEWLINE$NEWLINE---$NEWLINE$NEWLINE"
             fi
             HUNTER_NOTES="$HUNTER_NOTES**$AUTHOR** ($DATE):$NEWLINE$BODY$NEWLINE"
 
