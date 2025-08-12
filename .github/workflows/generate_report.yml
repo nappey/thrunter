@@ -65,13 +65,13 @@ jobs:
             if [[ -n "$HUNTER_NOTES" ]]; then
               HUNTER_NOTES="$HUNTER_NOTES
 
-              ---
+---
 
-              "
+"
             fi
             HUNTER_NOTES="$HUNTER_NOTES**$AUTHOR** ($DATE):
 
-            $BODY"
+$BODY"
 
           done < <(echo "$COMMENTS_JSON" | jq -c '.comments[]')
         else
