@@ -69,7 +69,8 @@ jobs:
               
               "
             fi
-            HUNTER_NOTES="$HUNTER_NOTES**$AUTHOR** ($DATE):$'\n'$BODY$'\n'"
+            HUNTER_NOTES="$HUNTER_NOTES**$AUTHOR** ($DATE): 
+            $BODY"
 
           done < <(echo "$COMMENTS_JSON" | jq -c '.comments[]')
         else
