@@ -61,7 +61,7 @@ jobs:
             AUTHOR=$(echo "$comment" | jq -r '.author.login')
             DATE=$(echo "$comment" | jq -r '.createdAt' | cut -d'T' -f1)
             BODY=$(echo "$comment" | jq -r '.body')
-            NEWLINE='\n'
+            NEWLINE=$'\n'
             
             if [[ -n "$HUNTER_NOTES" ]]; then
               HUNTER_NOTES="$HUNTER_NOTES
