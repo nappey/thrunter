@@ -196,11 +196,23 @@ Yup
 
 The following section contains comments, observations, and notes from the hunting team during the course of this investigation:
 
-**nappey** (2025-08-09): ```sql
+**nappey** (2025-08-09): 
+    
+    ---
+    
+    ```sql
 process where things happen
 ```
 
-This search will find bad things\n\n---\n\n**nappey** (2025-08-09): Looking into other data sources\n\n---\n\n**NayAlegna** (2025-08-12): test
+This search will find bad things\n\n---\n\n**nappey** (2025-08-09): 
+    
+    ---
+    
+    Looking into other data sources\n\n---\n\n**NayAlegna** (2025-08-12): 
+    
+    ---
+    
+    test
 
 ---
 
