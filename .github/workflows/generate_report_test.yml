@@ -397,6 +397,7 @@ jobs:
         COMMENT_BODY=$(echo "$COMMENT_BODY" | sed "s|\$REPORT_FILENAME|$REPORT_FILENAME|g")
         
         CONCLUSION_COMMENT=$(cat << EOF
+        <!--CONCLUSION_TAG-->
         **Conclusion**
         [Edit this comment as you need]
         
