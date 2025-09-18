@@ -12,7 +12,7 @@ permissions:
 jobs:
   generate-report:
     runs-on: ubuntu-latest
-    if: contains(github.event.label.name, 'complete')
+    if: contains(github.event.label.name, 'bug')
     
     steps:
     - name: Checkout repository
@@ -373,8 +373,7 @@ jobs:
         
   comment:
     runs-on: ubuntu-latest
-    if: contains(github.event.label.name, 'complete')
-
+    if: contains(github.event.label.name, 'bug')
     steps:
     - name: Comment on Issue
       env:
@@ -406,4 +405,4 @@ jobs:
         COMMENT_BODY=$(echo "$COMMENT_BODY" | sed "s|\$REPORT_FILENAME|$REPORT_FILENAME|g")
         
         # Post comment using gh CLI
-        echo "$COMMENT_BODY" | gh issue comment $ISSUE_NUMBER --body-file -
+        gh issue comment $ISSUE_NUMBER --body $COMMENT_BODY
