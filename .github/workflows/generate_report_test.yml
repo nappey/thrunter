@@ -387,6 +387,7 @@ jobs:
         - Recommendations and next steps
 
         Please review and update the report with actual hunt findings, evidence, and conclusions.
+        Please edit the comments for awesome wow awesome
 
         📄 [View the generated report]($REPORT_FILENAME)
         EOF
@@ -395,5 +396,13 @@ jobs:
         # Substitute the filename
         COMMENT_BODY=$(echo "$COMMENT_BODY" | sed "s|\$REPORT_FILENAME|$REPORT_FILENAME|g")
         
+        CONCLUSION_COMMENT=$(cat << EOF
+        **Conclusion**
+        [Edit this comment as you need]
+        
+        EOF
+        )
+        
         # Post comment using gh CLI
         gh issue comment $ISSUE_NUMBER --body "$COMMENT_BODY"
+        gh issue comment $ISSUE_NUMBER --body "$CONCLUSION_COMMENT"
