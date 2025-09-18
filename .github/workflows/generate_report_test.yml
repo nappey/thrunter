@@ -5,7 +5,7 @@ on:
     types: [labeled]
 
 permissions:
-  issues: read
+  issues: write
   contents: write
   pull-requests: write
 
@@ -13,9 +13,6 @@ jobs:
   generate-report:
     runs-on: ubuntu-latest
     if: contains(github.event.label.name, 'bug')
-    permissions:
-      issues: write
-      contents: read 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
