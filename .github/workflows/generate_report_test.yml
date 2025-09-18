@@ -15,6 +15,7 @@ jobs:
     if: contains(github.event.label.name, 'bug')
     permissions:
       issues: write
+      contents: read 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
