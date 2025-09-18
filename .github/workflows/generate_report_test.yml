@@ -396,10 +396,6 @@ jobs:
         📄 [View the generated report]($REPORT_FILENAME)
         EOF
         )
-
-        DESCRIPTION_COMMENT = 
-        DATA_COMMENT
-        CONCLUSION_COMMENT
         
         # Substitute the filename
         COMMENT_BODY=$(echo "$COMMENT_BODY" | sed "s|\$REPORT_FILENAME|$REPORT_FILENAME|g")
