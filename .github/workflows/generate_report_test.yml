@@ -13,7 +13,8 @@ jobs:
   generate-report:
     runs-on: ubuntu-latest
     if: contains(github.event.label.name, 'bug')
-    
+    permissions:
+      issues: write
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
