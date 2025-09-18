@@ -371,10 +371,6 @@ jobs:
           git push
         fi
         
-  comment:
-    runs-on: ubuntu-latest
-    if: contains(github.event.label.name, 'bug')
-    steps:
     - name: Comment on Issue
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
