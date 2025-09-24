@@ -29,8 +29,10 @@ jobs:
         "$COMMENT_BODY" \
         "<!-- CONCLUSION_TAG_END -->")
         
-        # Now do sed replacement
-        sed -i "/<!-- CONCLUSION_TAG_START -->/,/<!-- CONCLUSION_TAG_END -->/c$REPLACEMENT" "$FILE"
+        # Replace the block between tags
+        sed -i "/<!-- CONCLUSION_TAG_START -->/,/<!-- CONCLUSION_TAG_END -->/c\\
+        $REPLACEMENT" "$FILE"
+
     - name: Commit Report
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
