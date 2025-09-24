@@ -31,6 +31,7 @@ jobs:
         FIRST_LINE=${COMMENT_ARRAY[0]} 
         LAST_LINE=${COMMENT_ARRAY[-1]} 
         # echo "$COMMENT_BODY"
+        echo "$COMMENT_ARRAY"
         echo "$FIRST_LINE"
         echo "$LAST_LINE"
 
