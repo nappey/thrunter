@@ -29,8 +29,12 @@ jobs:
 
         # echo "$FIRST_LINE"
         # echo "$LAST_LINE"
+
+        # escape stupid char
+        ESC_FIRST=$(printf '%s\n' "$FIRST_LINE" | sed 's/[.[\*^$(){}+?|/]/\\&/g')
+        ESC_LAST=$(printf '%s\n' "$LAST_LINE" | sed 's/[.[\*^$(){}+?|/]/\\&/g')
         
         # Replace the block between tags
-        sed -i "s,\"$FIRST_LINE\".*\"$LAST_LINE\",\"$FIRST_LINE\"foo\"$LAST_LINE\",g" $FILE
+        sed -i "s,\"$ESC_FIRST\".*\"$ESC_LAST\",\"$ESC_FIRST\"foo\"$ESC_LAST\",g" $FILE
 
     - uses: stefanzweifel/git-auto-commit-action@v6
