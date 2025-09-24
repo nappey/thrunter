@@ -12,13 +12,13 @@ permissions:
 jobs:
   update-report: 
     runs-on: ubuntu-latest
+    env:
+      COMMENT_BODY: ${{ github.event.comment.body }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-      env:
-        COMMENT_BODY: ${{ github.event.comment.body }}
     
     - name: Update Report
       run: |
