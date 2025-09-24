@@ -227,6 +227,10 @@ Please edit the comments for awesome wow awesome
 - **Mean Time to Detection:** [X hours/days]
 - **Mean Time to Investigation:** [X hours/days]
 
+# Conclusion
+<!-- CONCLUSION_TAG -->
+sldkfjsdkjfs
+
 ---
 
 ## Report Metadata
