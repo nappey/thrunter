@@ -37,6 +37,8 @@ jobs:
         echo "$COMMENT_BODY"
         
         # Replace the block between tags
-        sed -i "s,\"$ESC_FIRST\".*\"$ESC_LAST\",\"$ESC_FIRST\"foo\"$ESC_LAST\",g" $FILE
+        # sed -i "s,\"$ESC_FIRST\".*\"$ESC_LAST\",\"$ESC_FIRST\"foo\"$ESC_LAST\",g" $FILE
+        sed -i "/$ESC_FIRST/,/$ESC_LAST/c\\
+        $COMMENT_BODY" "$FILE"
 
     - uses: stefanzweifel/git-auto-commit-action@v6
