@@ -22,9 +22,15 @@ jobs:
       run: |
         COMMENT_BODY="${{ github.event.comment.body }}"
         FILE="hunt-report-2025-08-09-2-this-is-a-test.md"
-
-        sed -i "/<!-- CONCLUSION_TAG_START -->/,/<!-- CONCLUSION_TAG_END -->/c\\<!-- CONCLUSION_TAG_START -->\n$COMMENT_BODY\n<!-- CONCLUSION_TAG_END -->" "$FILE"
-    
+        
+        # Build replacement block safely
+        REPLACEMENT=$(printf "%s\n%s\n%s" \
+        "<!-- CONCLUSION_TAG_START -->" \
+        "$COMMENT_BODY" \
+        "<!-- CONCLUSION_TAG_END -->")
+        
+        # Now do sed replacement
+        sed -i "/<!-- CONCLUSION_TAG_START -->/,/<!-- CONCLUSION_TAG_END -->/c$REPLACEMENT" "$FILE"
     - name: Commit Report
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
