@@ -26,6 +26,9 @@ jobs:
         FIRST_LINE=$(echo $COMMENT_BODY | head -n 1)
         LAST_LINE=$(echo $COMMENT_BODY | tail -n 1)
         # CONTENT=$(echo $COMMENT_BODY | head -n -1 | tail -n +2)
+
+        echo "$FIRST_LINE"
+        echo "$LAST_LINE"
         
         # Replace the block between tags
         sed -i 's/($FIRST_LINE).*($LAST_LINE)/($FIRST_LINE) foo ($LAST_LINE)/g' $FILE
