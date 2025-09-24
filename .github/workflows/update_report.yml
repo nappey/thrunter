@@ -27,14 +27,16 @@ jobs:
         LAST_LINE=$(echo $COMMENT_BODY | tail -n 1)
         # CONTENT=$(echo $COMMENT_BODY | head -n -1 | tail -n +2)
 
-        # echo "$FIRST_LINE"
-        # echo "$LAST_LINE"
+        # echo "$COMMENT_BODY"
+        echo "$FIRST_LINE"
+        echo "$LAST_LINE"
 
         # escape stupid char
         ESC_FIRST=$(printf '%s\n' "$FIRST_LINE" | sed 's/[.[\*^$(){}+?|/]/\\&/g')
         ESC_LAST=$(printf '%s\n' "$LAST_LINE" | sed 's/[.[\*^$(){}+?|/]/\\&/g')
 
-        echo "$COMMENT_BODY"
+        echo "$ESC_FIRST"
+        echo "$ESC_LAST"
         
         # Replace the block between tags
         # sed -i "s,\"$ESC_FIRST\".*\"$ESC_LAST\",\"$ESC_FIRST\"foo\"$ESC_LAST\",g" $FILE
