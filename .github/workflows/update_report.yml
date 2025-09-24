@@ -1,1 +1,40 @@
+name: Update Threat Hunt Report
 
+on:
+  issue_comment:
+    types: [edited]
+
+permissions:
+  issues: read
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-report: 
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Update Report
+      run: |
+        COMMENT_BODY="${{ github.event.comment.body }}"
+        FILE="hunt-report-2025-08-09-2-this-is-a-test.md"
+
+        sed -i "/<!-- CONCLUSION_TAG_START -->/,/<!-- CONCLUSION_TAG_END -->/c\\<!-- CONCLUSION_TAG_START -->\n$COMMENT_BODY\n<!-- CONCLUSION_TAG_END -->" "$FILE"
+    
+    - name: Commit Report
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add hunt-reports/
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Update threat hunt report for issue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}"
+          git push
+        fi
