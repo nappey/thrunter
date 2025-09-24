@@ -32,7 +32,7 @@ jobs:
         # CONTENT=$(echo $COMMENT_BODY | head -n -1 | tail -n +2)
 
         # IFS=' ' read -r -a COMMENT_ARRAY <<< "$COMMENT_BODY"
-        FIRST_LINE=${COMMENT_ARRAY[0]} 
+        FIRST_LINE=${COMMENT_BODY[0]} 
         # LAST_LINE=${COMMENT_ARRAY[-1]} 
         # echo "$COMMENT_BODY"
         echo "$FIRST_LINE"
