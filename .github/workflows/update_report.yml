@@ -24,7 +24,7 @@ jobs:
       run: |
         FILE="hunt-reports/hunt-report-2025-08-09-2-this-is-a-test.md"
 
-        echo -e "COMMENT_BODY"
+        echo -e "$COMMENT_BODY"
         echo "wow"
         
         # FIRST_LINE=$(echo $COMMENT_BODY | head -n 1)
@@ -36,8 +36,9 @@ jobs:
         # LAST_LINE=${COMMENT_ARRAY[-1]} 
         # echo "$COMMENT_BODY"
 
-        FIRST_LINE=${COMMENT_BODY*>}"
+        FIRST_LINE=${COMMENT_BODY*>}
         echo "$FIRST_LINE"
+        echo "first_line above"
         # echo "$LAST_LINE"
 
         # escape stupid char
