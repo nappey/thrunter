@@ -23,7 +23,7 @@ jobs:
     - name: Update Report
       run: |
         FILE_CONTENT=$(<hunt-reports/hunt-report-2025-08-09-2-this-is-a-test.md)
-        # FILE="hunt-reports/hunt-report-2025-08-09-2-this-is-a-test.md"
+        FILE_NAME="hunt-reports/hunt-report-2025-08-09-2-this-is-a-test.md"
 
         echo -e "$COMMENT_BODY"
         echo "wow"
@@ -43,7 +43,9 @@ jobs:
         # Replace the block between tags
         
         # echo sed -i "s,\"$ESC_FIRST\".*\"$ESC_LAST\",\"$ESC_FIRST\"foo\"$ESC_LAST\",g" $FILE_CONTENT >> hunt-reports/hunt-report-2025-08-09-2-this-is-a-test.md
-        sed -i "s,$ESC_FIRST.*$ESC_LAST,$ESC_FIRST foo $ESC_LAST,g" hunt-reports/hunt-report-2025-08-09-2-this-is-a-test.md
+        sed -i "s,$ESC_FIRST.*$ESC_LAST,$ESC_FIRST foo $ESC_LAST,g" $FILE_CONTENT
+
+        echo "$FILE_CONTENT" > "$FILE_NAME"
         
 
     - uses: stefanzweifel/git-auto-commit-action@v6
