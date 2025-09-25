@@ -22,7 +22,7 @@ jobs:
     
     - name: Update Report
       run: |
-        FILE="hunt-reports/hunt-report-2025-08-09-2-this-is-a-test.md"
+        FILE=$(<hunt-report-2025-08-09-2-this-is-a-test.md)
 
         echo -e "$COMMENT_BODY"
         echo "wow"
