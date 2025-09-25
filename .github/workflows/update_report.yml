@@ -31,8 +31,8 @@ jobs:
         LAST_LINE=$(echo "$COMMENT_BODY" | tail -n 1)
         
         # Replace the block between tags
-        sed -i "s,\"$FIRST_LINE\".*\"$LAST_LINE\",\"$FIRST_LINE\"foo\"$LAST_LINE\",g" $FILE
-        # sed -i "/$ESC_FIRST/,/$ESC_LAST/c\\
-        # $COMMENT_BODY" "$FILE"
+        # sed -i "s,\"$FIRST_LINE\".*\"$LAST_LINE\",\"$FIRST_LINE\"foo\"$LAST_LINE\",g" $FILE
+        sed -i "/$ESC_FIRST/,/$ESC_LAST/c\\
+        $COMMENT_BODY" "$FILE"
 
     - uses: stefanzweifel/git-auto-commit-action@v6
