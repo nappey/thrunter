@@ -23,7 +23,7 @@ jobs:
     - name: Update Report
       run: |
         FILE_CONTENT=$(<hunt-reports/hunt-report-2025-08-09-2-this-is-a-test.md)
-        FILE_NAME="hunt-reports/hunt-report-2025-08-09-2-this-is-a-test.md"
+        # FILE_NAME="hunt-reports/hunt-report-2025-08-09-2-this-is-a-test.md"
 
         echo -e "$COMMENT_BODY"
         echo "wow"
@@ -35,7 +35,7 @@ jobs:
 
         # echo -r "s/\[$FIRST_LINE.*$LAST_LINE\]/foo/g"
 
-        sed "s/\($FIRST_LINE.*$LAST_LINE\)/foo/g" $FILE_CONTENT
+        sed -i "s/\($FIRST_LINE.*$LAST_LINE\)/foo/g" $FILE_CONTENT
 
         echo "$FILE_CONTENT"
         
