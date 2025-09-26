@@ -22,32 +22,26 @@ jobs:
     
     - name: Update Report
       run: |
-        # FILE_CONTENT=$(<hunt-reports/hunt-report-2025-08-09-2-this-is-a-test.md)
         FILE_NAME="hunt-reports/hunt-report-2025-08-09-2-this-is-a-test.md"
-
-
-        echo -e "$COMMENT_BODY"
-        echo "wow"
-        echo $(<hunt-reports/hunt-report-2025-08-09-2-this-is-a-test.md)
-        echo "wow1"
 
         FIRST_LINE=$(echo "$COMMENT_BODY" | head -n 1)
         LAST_LINE=$(echo "$COMMENT_BODY" | tail -n 1)
-
-        FIRST_LINE=$(echo "$FIRST_LINE" | sed 's/\\//g')
-        LAST_LINE=$(echo "$LAST_LINE" | sed 's/\\//g')
+        MIDDLE_LINES=$(echo "$COMMENT_BODY" | sed '1d;$d')
         
-        printf '%q\n' "$FIRST_LINE" "$LAST_LINE"
+        # Save middle lines to a temp file
+        TMP_MIDDLE=$(mktemp)
+        echo "$MIDDLE_LINES" > "$TMP_MIDDLE"
+        awk -v start="$FIRST_LINE" -v end="$LAST_LINE" -v middlefile="$TMP_MIDDLE" '
+          $0 == start { 
+              print; 
+              while ((getline line < middlefile) > 0) print line; 
+              skip=1; 
+              next 
+          }
+          $0 == end { skip=0; print; next }
+          !skip { print }
+        ' "$FILE_NAME" > "$FILE_NAME.tmp" && mv "$FILE_NAME.tmp" "$FILE_NAME"
         
-        # Replace the block between tags
-
-        # echo "$FILE_CONTENT" | sed "s/\($FIRST_LINE.*$LAST_LINE\)/foo/g"
-        # echo "s/$FIRST_LINE\n.*\n$LAST_LINE/\nfoo\n/g" "$FILE_NAME"
-        # sed -i "s/$FIRST_LINE.*$LAST_LINE.*/$FIRST_LINEfoo$LAST_LINE/g" "$FILE_NAME" > what.md
-        sed -i "/$FIRST_LINE/,/$LAST_LINE/c\\
-        $FIRST_LINE\\
-        awesome\\
-        $LAST_LINE\\
-        " "$FILE_NAME"
-      
+        rm "$TMP_MIDDLE"
+              
     - uses: stefanzweifel/git-auto-commit-action@v6
