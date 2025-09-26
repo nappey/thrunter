@@ -228,9 +228,9 @@ Please edit the comments for awesome wow awesome
 - **Mean Time to Investigation:** [X hours/days]
 
 # Conclusion
-<!-- CONCLUSION_TAG_START -->
+<!--CONCLUSION_TAG_START-->
 sldkfjsdkjfs
-<!-- CONCLUSION_TAG_END -->
+<!--CONCLUSION_TAG_END-->
 ---
 
 ## Report Metadata
