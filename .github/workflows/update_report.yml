@@ -25,6 +25,8 @@ jobs:
         # FILE_CONTENT=$(<hunt-reports/hunt-report-2025-08-09-2-this-is-a-test.md)
         FILE_NAME="hunt-reports/hunt-report-2025-08-09-2-this-is-a-test.md"
 
+        ls
+
         echo -e "$COMMENT_BODY"
         echo "wow"
 
