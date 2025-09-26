@@ -42,7 +42,8 @@ jobs:
         # Replace the block between tags
 
         # echo "$FILE_CONTENT" | sed "s/\($FIRST_LINE.*$LAST_LINE\)/foo/g"
-        sed "s/$FIRST_LINE\n.*\n$LAST_LINE/\nfoo\n/g" "$FILE_NAME" > what.md
+        echo "s/$FIRST_LINE\n.*\n$LAST_LINE/\nfoo\n/g" "$FILE_NAME"
+        sed -i "s/$FIRST_LINE\n.*\n$LAST_LINE/\nfoo\n/g" "$FILE_NAME" > what.md
 
       
     - uses: stefanzweifel/git-auto-commit-action@v6
