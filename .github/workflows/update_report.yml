@@ -33,7 +33,9 @@ jobs:
         
         # Replace the block between tags
 
-        sed "s/\($FIRST_LINE.*$LAST_LINE\)/foo/g" $FILE_CONTENT
+        echo -r "s/\($FIRST_LINE.*$LAST_LINE\)/foo/g"
+
+        # sed "s/\($FIRST_LINE.*$LAST_LINE\)/foo/g" $FILE_CONTENT
 
         echo "$FILE_CONTENT"
         
