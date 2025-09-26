@@ -43,7 +43,11 @@ jobs:
 
         # echo "$FILE_CONTENT" | sed "s/\($FIRST_LINE.*$LAST_LINE\)/foo/g"
         # echo "s/$FIRST_LINE\n.*\n$LAST_LINE/\nfoo\n/g" "$FILE_NAME"
-        sed -i "s/$FIRST_LINE.*$LAST_LINE.*/$FIRST_LINEfoo$LAST_LINE/g" "$FILE_NAME" > what.md
-
+        # sed -i "s/$FIRST_LINE.*$LAST_LINE.*/$FIRST_LINEfoo$LAST_LINE/g" "$FILE_NAME" > what.md
+        sed -i "/$FIRST_LINE/,/$LAST_LINE/c\\
+        $FIRST_LINE\\
+        awesome\\
+        $LAST_LINE\\
+        " "$FILE_NAME"
       
     - uses: stefanzweifel/git-auto-commit-action@v6
