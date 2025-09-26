@@ -30,6 +30,10 @@ jobs:
 
         FIRST_LINE=$(echo "$COMMENT_BODY" | head -n 1)
         LAST_LINE=$(echo "$COMMENT_BODY" | tail -n 1)
+
+        FIRST_LINE=$(echo "$FIRST_LINE" | sed 's/\\//g')
+        LAST_LINE=$(echo "$LAST_LINE" | sed 's/\\//g')
+        
         printf '%q\n' "$FIRST_LINE" "$LAST_LINE"
         
         # Replace the block between tags
