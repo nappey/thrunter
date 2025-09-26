@@ -34,7 +34,7 @@ jobs:
         # Replace the block between tags
 
         # echo "$FILE_CONTENT" | sed "s/\($FIRST_LINE.*$LAST_LINE\)/foo/g"
-        sed -i "s/\($FIRST_LINE.*$LAST_LINE\)/foo/g" "$FILE_NAME"
+        sed -i "/$FIRST_LINE/,/$LAST_LINE/c\\$FIRST_LINE\nfoo\n$LAST_LINE" "$FILE"
         
 
     - uses: stefanzweifel/git-auto-commit-action@v6
